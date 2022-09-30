@@ -1,0 +1,2 @@
+add_subdirectory(fabricclient)
+add_subdirectory(echoapp)
