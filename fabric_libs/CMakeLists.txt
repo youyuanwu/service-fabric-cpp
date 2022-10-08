@@ -1,5 +1,12 @@
 # here are targets to build lib files
 
+# find runtime and sdk location
+if(NOT ServiceFabric_Runtime_ROOT)
+    set(ServiceFabric_Runtime_ROOT "C:\\Program Files\\Microsoft Service Fabric")
+endif()
+
+set(ServiceFabric_Runtime_BINARY_DIR "${ServiceFabric_Runtime_ROOT}\\bin\\Fabric\\Fabric.Code")
+
 # find dlls
 find_file(FabricRuntime_DLL
     NAMES FabricRuntime.dll

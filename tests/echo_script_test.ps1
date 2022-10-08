@@ -1,11 +1,13 @@
 $ErrorActionPreference = "Stop";
 
-.\scripts\echomain_ctl.ps1 -Action Add
+# Script root is the current script file location
+
+& "$PSScriptRoot\..\scripts\echomain_ctl.ps1" -Action Add
 
 start-sleep -seconds 20
 
-.\scripts\echomain_ctl.ps1 -Action Resolve
+& "$PSScriptRoot\..\scripts\echomain_ctl.ps1" -Action Resolve
 
-.\scripts\echomain_ctl.ps1 -Action Echo -Mode Test
+& "$PSScriptRoot\..\scripts\echomain_ctl.ps1" -Action Echo -Mode Test
 
-.\scripts\echomain_ctl.ps1 -Action Remove
+& "$PSScriptRoot\..\scripts\echomain_ctl.ps1" -Action Remove

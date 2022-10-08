@@ -44,6 +44,11 @@ foreach(_idl_file ${idl_files})
     list(APPEND out_srcs ${_out_src})
 endforeach()
 
+# In idl only mode only downloads ids.
+if(service_fabric_BuildIDLOnly)
+  return()
+endif()
+
 # generate headers
 # add_custom_target(fabric_headers ALL
 #     DEPENDS ${out_headers}
