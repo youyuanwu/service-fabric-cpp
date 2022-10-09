@@ -1,10 +1,10 @@
 #pragma once
 
-#include <winerror.h>
 #include <string_view>
+#include <winerror.h>
 
-namespace servicefabric{
+namespace servicefabric {
 
 std::string_view get_fabric_error_str(HRESULT hr);
 
-} // namespace
+} // namespace servicefabric

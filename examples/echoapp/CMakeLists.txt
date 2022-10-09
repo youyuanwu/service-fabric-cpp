@@ -8,7 +8,7 @@ file(GLOB SOURCES
 add_executable(echomain ${SOURCES})
 
 target_link_libraries(echomain 
-    PRIVATE servicefabric
+    PRIVATE fabric_ext
     PRIVATE fabric_error    
 )
 

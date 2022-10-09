@@ -72,7 +72,7 @@ add_custom_command(
     VERBATIM
 )
 
-add_custom_target(fabric_libs ALL
+add_custom_target(fabric_import_libs ALL
     DEPENDS 
     ${CMAKE_CURRENT_BINARY_DIR}/FabricRuntime.lib
     ${CMAKE_CURRENT_BINARY_DIR}/FabricClient.lib

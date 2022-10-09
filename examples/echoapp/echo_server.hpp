@@ -1,14 +1,12 @@
 #pragma once
 
+#include <boost/asio.hpp>
 #include <memory>
 #include <utility>
-#include <boost/asio.hpp>
 
 using tcp = boost::asio::ip::tcp;
 
-class session
-  : public std::enable_shared_from_this<session>
-{
+class session : public std::enable_shared_from_this<session> {
 public:
   session(tcp::socket socket);
 
@@ -24,10 +22,9 @@ private:
   char data_[max_length];
 };
 
-class server
-{
+class server {
 public:
-  server(boost::asio::io_context& io_context, short port);
+  server(boost::asio::io_context &io_context, short port);
 
 private:
   void do_accept();

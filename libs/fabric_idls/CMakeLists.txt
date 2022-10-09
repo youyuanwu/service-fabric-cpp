@@ -49,35 +49,13 @@ if(service_fabric_BuildIDLOnly)
   return()
 endif()
 
-# generate headers
-# add_custom_target(fabric_headers ALL
-#     DEPENDS ${out_headers}
-# )
-
-# add_custom_target(fabric_srcs ALL
-#     DEPENDS ${out_srcs}
-# )
-
 # sf header only lib
-add_library(servicefabric_idl INTERFACE ${out_headers})
-target_include_directories(servicefabric_idl INTERFACE
+add_library(fabric_headers INTERFACE ${out_headers})
+target_include_directories(fabric_headers INTERFACE
     ${CMAKE_CURRENT_BINARY_DIR}/include # generated includes
 )
 
 # static lib that has uuids
-# This is a hack to bundle SF libs in link dirs.
-# fabric_libs cmake set .lib file location does not work.
-add_library(servicefabric_static STATIC
+add_library(fabric_uuids STATIC
     ${out_srcs}
-)
-add_dependencies(servicefabric_static fabric_libs)
-
-target_link_libraries(servicefabric_static
-  INTERFACE servicefabric_idl
-  PUBLIC FabricClient
-  PUBLIC FabricRuntime
-  PUBLIC FabricResources
-)
-target_link_directories(servicefabric_static
-  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../fabric_libs
 )
