@@ -9,7 +9,8 @@ add_executable(echomain ${SOURCES})
 
 target_link_libraries(echomain 
     PRIVATE fabric_ext
-    PRIVATE fabric_error    
+    PRIVATE fabric_error
+    PRIVATE FabricRuntime    
 )
 
 target_compile_definitions(echomain

@@ -5,6 +5,6 @@
 
 namespace servicefabric {
 
-std::string_view get_fabric_error_str(HRESULT hr);
+std::string get_fabric_error_str(HRESULT hr);
 
 } // namespace servicefabric

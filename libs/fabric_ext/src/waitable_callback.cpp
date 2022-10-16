@@ -11,13 +11,17 @@ void FabricAsyncOperationWaitableCallback::Invoke(
   {
     std::lock_guard lk(m_);
     ready_ = true;
+#ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "FabricAsyncOperationWaitableCallback::Invoke";
+#endif
   }
   cv_.notify_all();
 }
 
 void FabricAsyncOperationWaitableCallback::Wait() {
+#ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "FabricAsyncOperationWaitableCallback::Wait";
+#endif
   std::unique_lock lk(m_);
   cv_.wait(lk, [this] { return ready_; });
 }

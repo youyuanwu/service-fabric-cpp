@@ -1,5 +1,6 @@
 #include "servicefabric/fabric_error.hpp"
 #include "FabricTypes.h"
+#include <comdef.h>
 
 #define MAGIC_ENUM_RANGE_MIN 0x80071bbc
 #define MAGIC_ENUM_RANGE_MAX 0x80071d4b
@@ -7,15 +8,18 @@
 
 namespace servicefabric {
 
-std::string_view get_fabric_error_str(HRESULT hr) {
+std::string get_fabric_error_str(HRESULT hr) {
   if (hr < FABRIC_E_FIRST_RESERVED_HRESULT ||
       hr > FABRIC_E_LAST_RESERVED_HRESULT) {
-    return "not fabric error";
+    // try get the error from com
+    _com_error err(hr);
+    LPCTSTR errMsg = err.ErrorMessage();
+    return std::string(errMsg);
   }
 
   auto fabric_code = magic_enum::enum_cast<FABRIC_ERROR_CODE>(hr);
   if (fabric_code.has_value()) {
-    return magic_enum::enum_name(fabric_code.value());
+    return std::string(magic_enum::enum_name(fabric_code.value()));
   }
   return "enum not found. idl maybe too old";
 }

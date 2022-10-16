@@ -39,16 +39,16 @@ target_link_libraries(fabric_ext
   PUBLIC fabric_headers
   PUBLIC    Boost::log
   PUBLIC    fabric_uuids
-  PUBLIC    FabricRuntime
-  PUBLIC    FabricClient
-  PUBLIC    FabricResources
+  # PUBLIC    FabricRuntime
+  # PUBLIC    FabricClient
+  # PUBLIC    FabricResources
 )
 
-add_dependencies(fabric_ext fabric_import_libs) # make sure import libs are generated
+#add_dependencies(fabric_ext fabric_import_libs) # make sure import libs are generated
 
-target_link_directories(fabric_ext
-  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../fabric_import_libs
-)
+# target_link_directories(fabric_ext
+#   PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/../fabric_import_libs
+# )
 
 target_compile_definitions(fabric_ext
   PUBLIC WIN32_LEAN_AND_MEAN # This is to get rid of include from fabric of winsock.h
