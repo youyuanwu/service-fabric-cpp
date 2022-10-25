@@ -12,6 +12,7 @@ target_link_libraries(${_test_name}
     moderncom
     fabric_error
     fabric_ext
+    fabric_internal_ext
 )
 
 target_compile_definitions(${_test_name}

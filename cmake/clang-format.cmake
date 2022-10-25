@@ -1,6 +1,7 @@
 file(GLOB_RECURSE ALL_SOURCE_FILES 
     examples/*.cpp
     examples/*.hpp
+    examples/*.ixx
     include/*.cpp
     include/*.hpp
     tests/*.cpp

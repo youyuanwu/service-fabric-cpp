@@ -6,16 +6,17 @@
 
 #include <moderncom/interfaces.h>
 
-#include "conn_handler.hpp"
-#include "msg_disposer.hpp"
 #include "request_handler.hpp"
-
-#include "client_event_handler.hpp"
-#include "client_notification_handler.hpp"
 
 #include "servicefabric/async_context.hpp"
 #include "servicefabric/fabric_error.hpp"
+#include "servicefabric/transport_dummy_client_conn_handler.hpp"
+#include "servicefabric/transport_dummy_client_notification_handler.hpp"
+#include "servicefabric/transport_dummy_msg_disposer.hpp"
+#include "servicefabric/transport_dummy_server_conn_handler.hpp"
+#include "servicefabric/transport_message.hpp"
 #include "servicefabric/waitable_callback.hpp"
+
 namespace sf = servicefabric;
 
 BOOST_AUTO_TEST_SUITE(test_fabric_transport)
@@ -41,9 +42,9 @@ BOOST_AUTO_TEST_CASE(test_1) {
   belt::com::com_ptr<IFabricTransportMessageHandler> req_handler =
       request_handler::create_instance().to_ptr();
   belt::com::com_ptr<IFabricTransportConnectionHandler> conn_handler =
-      conn_handler::create_instance().to_ptr();
+      sf::transport_dummy_server_conn_handler::create_instance().to_ptr();
   belt::com::com_ptr<IFabricTransportMessageDisposer> msg_disposer =
-      msg_disposer::create_instance().to_ptr();
+      sf::transport_dummy_msg_disposer::create_instance().to_ptr();
   belt::com::com_ptr<IFabricTransportListener> listener;
 
   // create listener
@@ -69,12 +70,13 @@ BOOST_AUTO_TEST_CASE(test_1) {
 #endif
 
   belt::com::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
-      client_notification_handler::create_instance().to_ptr();
+      sf::transport_dummy_client_notification_handler::create_instance()
+          .to_ptr();
 
   belt::com::com_ptr<IFabricTransportClientEventHandler> client_event_h =
-      client_event_handler::create_instance().to_ptr();
+      sf::transport_dummy_client_conn_handler::create_instance().to_ptr();
   belt::com::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
-      msg_disposer::create_instance().to_ptr();
+      sf::transport_dummy_msg_disposer::create_instance().to_ptr();
   ;
   belt::com::com_ptr<IFabricTransportClient> client;
 
@@ -107,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_1) {
         sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
     belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
     belt::com::com_ptr<IFabricTransportMessage> msg =
-        message::create_instance("mybody", "myheader").to_ptr();
+        sf::transport_message::create_instance("mybody", "myheader").to_ptr();
     hr = client->BeginRequest(msg.get(), 1000, callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
@@ -115,19 +117,8 @@ BOOST_AUTO_TEST_CASE(test_1) {
     hr = client->EndRequest(ctx.get(), reply.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
 
-    std::string body;
-    std::string headers;
-    const FABRIC_TRANSPORT_MESSAGE_BUFFER *headerbuf = {};
-    const FABRIC_TRANSPORT_MESSAGE_BUFFER *msgbuf = {};
-    ULONG msgcount = 0;
-    reply->GetHeaderAndBodyBuffer(&headerbuf, &msgcount, &msgbuf);
-    headers = std::string(headerbuf->Buffer,
-                          headerbuf->Buffer + headerbuf->BufferSize);
-    for (std::size_t i = 0; i < msgcount; i++) {
-      const FABRIC_TRANSPORT_MESSAGE_BUFFER *msg_i = msgbuf + i;
-      std::string msg_str(msg_i->Buffer, msg_i->Buffer + msg_i->BufferSize);
-      body += msg_str;
-    }
+    std::string body = sf::get_body(reply.get());
+    std::string headers = sf::get_header(reply.get());
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug)
         << "reply header: " << headers << " body: " << body;
@@ -141,6 +132,7 @@ BOOST_AUTO_TEST_CASE(test_1) {
     belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener->BeginClose(callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
+    callback->Wait();
     hr = listener->EndClose(ctx.get());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
   }

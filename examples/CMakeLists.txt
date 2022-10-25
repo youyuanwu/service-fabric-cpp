@@ -1,2 +1,3 @@
 add_subdirectory(fabricclient)
 add_subdirectory(echoapp)
+add_subdirectory(kvstore)
