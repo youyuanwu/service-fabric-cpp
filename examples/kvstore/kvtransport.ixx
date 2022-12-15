@@ -174,3 +174,33 @@ private:
   std::wstring listening_addr_;
   bool is_listening_;
 };
+
+export class kv_client {
+public:
+  kv_client(belt::com::com_ptr<IFabricTransportClient> client)
+      : client_(client) {}
+
+  HRESULT send(belt::com::ref<IFabricTransportMessage> const request,
+               belt::com::com_ptr<IFabricTransportMessage> &reply) {
+    HRESULT hr = S_OK;
+    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    hr = client_->BeginRequest(request.get(), 1000, callback.get(), ctx.put());
+
+    if (hr != S_OK) {
+      BOOST_LOG_TRIVIAL(error) << "cannot BeginRequest: " << hr;
+      return hr;
+    }
+    callback->Wait();
+    hr = client_->EndRequest(ctx.get(), reply.put());
+    if (hr != S_OK) {
+      BOOST_LOG_TRIVIAL(error) << "cannot EndRequest: " << hr;
+      return hr;
+    }
+    return S_OK;
+  }
+
+private:
+  belt::com::com_ptr<IFabricTransportClient> client_;
+};

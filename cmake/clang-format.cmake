@@ -1,3 +1,4 @@
+# generic file filter
 file(GLOB_RECURSE ALL_SOURCE_FILES 
     examples/*.cpp
     examples/*.hpp
@@ -6,8 +7,12 @@ file(GLOB_RECURSE ALL_SOURCE_FILES
     include/*.hpp
     tests/*.cpp
     tests/*.hpp
+    tests/*.ixx
     libs/*.cpp
     libs/*.hpp
+    libs/*.ixx
+    src/*.cpp
+    src/*.hpp
 )
 
 add_custom_target(

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "FabricCommon.h"
-//#include "FabricRuntime.h"
+// #include "FabricRuntime.h"
 #include <moderncom/interfaces.h>
 
 namespace servicefabric {

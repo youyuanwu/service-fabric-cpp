@@ -56,8 +56,8 @@ foreach(_header_c ${out_headers})
     set(_out_header_cpp ${_out_dir}/${_file_name}.h)
     add_custom_command(
         OUTPUT ${_out_header_cpp}
-        COMMAND powershell.exe -file "scripts/gen_cpp.ps1" -Source ${_header_c} -OutFile ${_out_header_cpp}
-        WORKING_DIRECTORY ${service-fabric_SOURCE_DIR}
+        COMMAND powershell.exe -file "${service-fabric_SOURCE_DIR}/scripts/gen_cpp.ps1" -Source ${_header_c} -OutFile ${_out_header_cpp}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         DEPENDS ${_header_c}
     )
     list(APPEND out_header_cpps ${_out_header_cpp})

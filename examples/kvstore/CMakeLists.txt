@@ -1,29 +1,31 @@
 set (CMAKE_CXX_STANDARD 20)
 
-file(GLOB SOURCES
-*.ixx
-*.cpp
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost REQUIRED COMPONENTS program_options)
+
+
+add_library(kvstore_lib
+    kvstore.ixx
+    kvcurd.ixx
+    kvtransport.ixx
 )
+
+target_link_libraries(kvstore_lib 
+    PUBLIC fabric_ext
+    PUBLIC fabric_internal_ext
+    PUBLIC fabric_error
+    PUBLIC FabricRuntime
+    PUBLIC FabricTransport
+    PUBLIC Boost::program_options
+)
+target_compile_definitions(kvstore_lib
+    PUBLIC _WIN32_WINNT=0x0601
+)
+
 
 set(_exe_name kvstore)
-add_executable(${_exe_name} ${SOURCES})
-
-target_link_libraries(${_exe_name}  
-    PRIVATE fabric_ext
-    PRIVATE fabric_internal_ext
-    PRIVATE fabric_error
-    PRIVATE FabricRuntime
-    PRIVATE FabricTransport
-)
-
-target_compile_definitions(${_exe_name} 
-    PRIVATE _WIN32_WINNT=0x0601
-)
-
-target_compile_options(${_exe_name}
-    PUBLIC /experimental:module
-    PUBLIC /std:c++latest
-)
+add_executable(${_exe_name} kvstore_main.cpp)
+target_link_libraries(${_exe_name} PRIVATE kvstore_lib)
 
 set(_pkg_root ${CMAKE_BINARY_DIR}/kvstore_root)
 
@@ -39,3 +41,7 @@ add_custom_command(TARGET ${_exe_name} POST_BUILD
     COMMAND ${CMAKE_COMMAND} 
         -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/${_exe_name}.exe.cfg ${_pkg_root}/KvStoreServicePackage/Code
 )
+
+# client exe
+add_executable(kvclient kvclient.cpp)
+target_link_libraries(kvclient PRIVATE kvstore_lib)

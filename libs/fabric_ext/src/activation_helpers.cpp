@@ -1,5 +1,5 @@
 #include "servicefabric/activation_helpers.hpp"
-//#include "FabricCommon.h"
+// #include "FabricCommon.h"
 #include "servicefabric/waitable_callback.hpp"
 #include <boost/log/trivial.hpp>
 #include <moderncom/interfaces.h>

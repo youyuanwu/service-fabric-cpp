@@ -161,16 +161,49 @@ public:
   }
 };
 
+// resolve port for endpoint
+export class resolver {
+public:
+  virtual HRESULT get_port(std::wstring endpoint_name, ULONG &port) = 0;
+};
+
+export class sf_resolver : public resolver {
+public:
+  sf_resolver(
+      belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx)
+      : activation_ctx_(activation_ctx) {}
+  HRESULT get_port(std::wstring endpoint_name, ULONG &port) override {
+    return sf::get_port(activation_ctx_, endpoint_name, port);
+  }
+
+private:
+  belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx_;
+};
+
+export class dummy_resolver : public resolver {
+public:
+  HRESULT get_port(std::wstring endpoint_name, ULONG &port) override {
+    if (endpoint_name == L"KvTransportEndpoint") {
+      port = 12345;
+      return S_OK;
+    }
+    if (endpoint_name == L"KvReplicatorEndpoint") {
+      port = 12346;
+      return S_OK;
+    }
+    assert(false);
+    return E_FAIL;
+  }
+};
+
 const std::wstring KeyValueStoreName = L"kvstoreKeyValueStore";
 
 export class service_factory
     : public belt::com::object<service_factory, IFabricStatefulServiceFactory> {
 
 public:
-  service_factory(
-      belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx,
-      std::wstring hostname)
-      : activation_ctx_(activation_ctx), hostname_(hostname),
+  service_factory(std::shared_ptr<resolver> resolver, std::wstring hostname)
+      : resolver_(resolver), hostname_(hostname),
         event_handler_(datastore_event_handler::create_instance().to_ptr()) {}
 
   HRESULT STDMETHODCALLTYPE CreateReplica(
@@ -193,21 +226,21 @@ public:
     BOOST_LOG_TRIVIAL(debug)
         << "service_factory::CreateInstance "
         << "serviceTypeName " << serviceTypeName << "serviceName "
-        << serviceName << "initializationDataLength "
-        << initializationDataLength << "initializationData"
+        << serviceName << " initializationDataLength "
+        << initializationDataLength << " initializationData "
         << data
         // << "partitionId " << partitionId
-        << "replicaId " << replicaId;
+        << " replicaId " << replicaId;
 
     ULONG port = 0;
-    HRESULT hr = sf::get_port(activation_ctx_, L"KvReplicatorEndpoint", port);
+    HRESULT hr = resolver_->get_port(L"KvReplicatorEndpoint", port);
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "Cannot get port: " << hr;
       return hr;
     }
 
     ULONG transport_port = 0;
-    hr = sf::get_port(activation_ctx_, L"KvTransportEndpoint", transport_port);
+    hr = resolver_->get_port(L"KvTransportEndpoint", transport_port);
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "Cannot get KvTransportEndpoint port: " << hr;
       return hr;
@@ -246,7 +279,8 @@ public:
   }
 
 private:
-  belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx_;
+  // belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx_;
+  std::shared_ptr<resolver> resolver_;
   std::wstring hostname_;
   belt::com::com_ptr<IFabricStoreEventHandler> event_handler_;
 };

@@ -1,8 +1,8 @@
 #define BOOST_TEST_MODULE service_communication
 
 #include <boost/log/trivial.hpp>
-//#include <boost/log/core.hpp>
-//#include <boost/log/utility/setup/console.hpp>
+// #include <boost/log/core.hpp>
+// #include <boost/log/utility/setup/console.hpp>
 
 #include <boost/test/unit_test.hpp>
 
