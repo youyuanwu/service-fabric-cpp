@@ -20,6 +20,8 @@ HRESULT STDMETHODCALLTYPE service_factory::CreateInstance(
                        initializationData + initializationDataLength);
   }
 
+  UNREFERENCED_PARAMETER(partitionId);
+
   BOOST_LOG_TRIVIAL(debug) << "service_factory::CreateInstance "
                            << "serviceTypeName " << serviceTypeName
                            << "serviceName " << serviceName

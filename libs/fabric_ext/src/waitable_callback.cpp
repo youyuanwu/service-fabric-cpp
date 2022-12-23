@@ -9,6 +9,7 @@ FabricAsyncOperationWaitableCallback::FabricAsyncOperationWaitableCallback()
 void FabricAsyncOperationWaitableCallback::Invoke(
     /* [in] */ IFabricAsyncOperationContext *context) {
   {
+    UNREFERENCED_PARAMETER(context);
     std::lock_guard lk(m_);
     ready_ = true;
 #ifdef SF_DEBUG

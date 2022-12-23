@@ -53,17 +53,18 @@ BOOST_AUTO_TEST_CASE(test_1) {
       conn_handler.get(), msg_disposer.get(), listener.put());
 
   BOOST_REQUIRE_EQUAL(S_OK, hr);
-  // open listener
-  belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-      sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
-  hr = listener->BeginOpen(callback.get(), ctx.put());
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-  callback->Wait();
   belt::com::com_ptr<IFabricStringResult> addr_str;
-  hr = listener->EndOpen(ctx.get(), addr_str.put());
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-
+  {
+    // open listener
+    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    hr = listener->BeginOpen(callback.get(), ctx.put());
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
+    callback->Wait();
+    hr = listener->EndOpen(ctx.get(), addr_str.put());
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
+  }
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "Server listening on : "
                            << addr_str->get_String();

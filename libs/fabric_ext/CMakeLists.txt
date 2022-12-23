@@ -30,4 +30,9 @@ target_compile_definitions(fabric_ext
   PUBLIC _WIN32_WINNT=0x601  # This is to pin the log version
 )
 
+# good practice
+target_compile_options(fabric_ext
+  PUBLIC /W4 /WX
+)
+
 set_property(TARGET fabric_ext PROPERTY CXX_STANDARD 20)

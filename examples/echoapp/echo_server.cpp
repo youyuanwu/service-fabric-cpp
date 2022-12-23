@@ -23,6 +23,7 @@ void session::do_write(std::size_t length) {
   boost::asio::async_write(
       socket_, boost::asio::buffer(data_, length),
       [this, self](boost::system::error_code ec, std::size_t len) {
+        UNREFERENCED_PARAMETER(len);
         if (!ec) {
           do_read();
         }

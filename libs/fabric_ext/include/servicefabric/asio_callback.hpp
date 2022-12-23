@@ -16,11 +16,12 @@ public:
   callback_obj(std::function<void(IFabricAsyncOperationContext *)> token,
                Executor ex)
       : optr_(), ctx_(nullptr), token_(token) {
-    optr_.reset(ex, [this](boost::system::error_code ec, size_t) {
-      // invoke the callback.
-      BOOST_ASSERT(!ec.failed());
-      token_(ctx_);
-    });
+    optr_.reset(ex,
+                [this]([[maybe_unused]] boost::system::error_code ec, size_t) {
+                  // invoke the callback.
+                  BOOST_ASSERT(!ec.failed());
+                  token_(ctx_);
+                });
   }
 
   void complete() {

@@ -91,7 +91,7 @@ local_main(belt::com::com_ptr<IFabricStatefulServiceFactory> &service_factory,
     return hr;
   }
 
-  FABRIC_REPLICA_OPEN_MODE mode = FABRIC_REPLICA_OPEN_MODE_NEW;
+  // FABRIC_REPLICA_OPEN_MODE mode = FABRIC_REPLICA_OPEN_MODE_NEW;
   // replica->BeginOpen(mode,)
 
   return S_OK;

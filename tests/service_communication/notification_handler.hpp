@@ -21,6 +21,8 @@ public:
       /* [in] */ DWORD timeoutMilliseconds,
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
+    UNREFERENCED_PARAMETER(clientId);
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
     FABRIC_MESSAGE_BUFFER *body = message->Get_Body();
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug)
@@ -36,6 +38,7 @@ public:
   virtual HRESULT STDMETHODCALLTYPE EndProcessRequest(
       /* [in] */ IFabricAsyncOperationContext *context,
       /* [retval][out] */ IFabricServiceCommunicationMessage **reply) override {
+    UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "notification_handler::EndProcessRequest";
 #endif
@@ -48,6 +51,8 @@ public:
   virtual HRESULT STDMETHODCALLTYPE HandleOneWay(
       /* [in] */ COMMUNICATION_CLIENT_ID clientId,
       /* [in] */ IFabricServiceCommunicationMessage *message) override {
+    UNREFERENCED_PARAMETER(clientId);
+    UNREFERENCED_PARAMETER(message);
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "notification_handler::HandleOneWay";
 #endif

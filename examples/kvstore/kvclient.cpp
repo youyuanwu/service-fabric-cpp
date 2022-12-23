@@ -21,7 +21,7 @@ std::wstring resolve_kvstore() { return L""; }
 
 int main() {
   resolve_kvstore();
-  return 0;
+  // return 0;
 
   FABRIC_SECURITY_CREDENTIALS cred = {};
   cred.Kind = FABRIC_SECURITY_CREDENTIAL_KIND_NONE;

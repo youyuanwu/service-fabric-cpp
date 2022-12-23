@@ -10,6 +10,8 @@ transport_dummy_server_conn_handler::BeginProcessConnect(
     /* [in] */ DWORD timeoutMilliseconds,
     /* [in] */ IFabricAsyncOperationCallback *callback,
     /* [retval][out] */ IFabricAsyncOperationContext **context) {
+  UNREFERENCED_PARAMETER(clientConnection);
+  UNREFERENCED_PARAMETER(timeoutMilliseconds);
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessConnect";
 #endif
@@ -25,6 +27,7 @@ transport_dummy_server_conn_handler::BeginProcessConnect(
 HRESULT STDMETHODCALLTYPE
 transport_dummy_server_conn_handler::EndProcessConnect(
     /* [in] */ IFabricAsyncOperationContext *context) {
+  UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "conn_handler::EndProcessConnect";
 #endif
@@ -37,6 +40,8 @@ transport_dummy_server_conn_handler::BeginProcessDisconnect(
     /* [in] */ DWORD timeoutMilliseconds,
     /* [in] */ IFabricAsyncOperationCallback *callback,
     /* [retval][out] */ IFabricAsyncOperationContext **context) {
+  UNREFERENCED_PARAMETER(clientId);
+  UNREFERENCED_PARAMETER(timeoutMilliseconds);
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessDisconnect";
 #endif
@@ -49,6 +54,7 @@ transport_dummy_server_conn_handler::BeginProcessDisconnect(
 HRESULT STDMETHODCALLTYPE
 transport_dummy_server_conn_handler::EndProcessDisconnect(
     /* [in] */ IFabricAsyncOperationContext *context) {
+  UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "conn_handler::EndProcessDisconnect";
 #endif

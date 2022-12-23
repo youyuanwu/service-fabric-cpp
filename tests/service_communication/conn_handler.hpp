@@ -14,6 +14,8 @@ public:
       /* [in] */ DWORD timeoutMilliseconds,
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
+    UNREFERENCED_PARAMETER(clientConnection);
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessConnect";
 #endif
@@ -28,6 +30,7 @@ public:
 
   HRESULT STDMETHODCALLTYPE EndProcessConnect(
       /* [in] */ IFabricAsyncOperationContext *context) override {
+    UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "conn_handler::EndProcessConnect";
 #endif
@@ -39,6 +42,8 @@ public:
       /* [in] */ DWORD timeoutMilliseconds,
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
+    UNREFERENCED_PARAMETER(clientId);
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessDisconnect";
 #endif
@@ -50,6 +55,7 @@ public:
 
   HRESULT STDMETHODCALLTYPE EndProcessDisconnect(
       /* [in] */ IFabricAsyncOperationContext *context) override {
+    UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "conn_handler::EndProcessDisconnect";
 #endif
