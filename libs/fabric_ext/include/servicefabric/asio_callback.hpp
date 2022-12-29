@@ -1,7 +1,12 @@
 #pragma once
 
 #include "FabricCommon.h"
+#include <boost/asio/windows/object_handle.hpp>
 #include <boost/asio/windows/overlapped_ptr.hpp>
+
+// #include <boost/asio/awaitable.hpp>
+#include <boost/asio/use_awaitable.hpp>
+
 #include <moderncom/interfaces.h>
 
 #include <functional>
@@ -58,6 +63,45 @@ public:
 
 private:
   details::callback_obj c_obj_;
+};
+
+MIDL_INTERFACE("2ebd9df8-f94b-4ab5-bfd4-13af87298f3d")
+IAwaitableCallback : public IFabricAsyncOperationCallback {
+public:
+  // for co_await
+  virtual boost::asio::awaitable<void> await() = 0;
+};
+
+class AsioAwaitableCallback
+    : public belt::com::object<AsioAwaitableCallback, IAwaitableCallback> {
+public:
+  template <typename Executor> AsioAwaitableCallback(Executor ex) : oh_(ex) {
+    // create a event and assgn to handle
+    HANDLE ev = CreateEvent(NULL,  // default security attributes
+                            TRUE,  // manual-reset event
+                            FALSE, // initial state is nonsignaled
+                            NULL   // object name
+    );
+    assert(ev != nullptr);
+    oh_.assign(ev);
+  }
+
+  void Invoke(/* [in] */ IFabricAsyncOperationContext *context) override {
+    UNREFERENCED_PARAMETER(context);
+    HANDLE ev = oh_.native_handle();
+    assert(ev != nullptr);
+    [[maybe_unused]] bool ok = SetEvent(ev);
+    assert(ok);
+  }
+
+  boost::asio::awaitable<void> await() override {
+    assert(oh_.is_open());
+    return oh_.async_wait(boost::asio::use_awaitable);
+  }
+
+private:
+  // boost::asio::windows::overlapped_ptr optr_;
+  boost::asio::windows::object_handle oh_;
 };
 
 } // namespace servicefabric

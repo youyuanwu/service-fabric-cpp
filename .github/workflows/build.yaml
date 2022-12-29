@@ -42,15 +42,16 @@ jobs:
     - name: run build
       run: cmake --build build --config ${{ matrix.BUILD_TYPE }}
     
-    - name: run test
-      run: ctest -C ${{ matrix.BUILD_TYPE }} --test-dir build --verbose --repeat until-pass:3 --timeout 30
-    
     - name: start sf cluster
       run: Powershell.exe -File "C:\Program Files\Microsoft SDKs\Service Fabric\ClusterSetup\DevClusterSetup.ps1" -CreateOneNodeCluster
 
     - name: start connection
       run: Powershell.exe -File .\scripts\check_cluster_online.ps1
     # TODO: determine if stop cluster is needed
+
+    # some tests require cluster to be running.
+    - name: run test
+      run: ctest -C ${{ matrix.BUILD_TYPE }} --test-dir build --verbose --repeat until-pass:3 --timeout 30
 
     - name: run example test
       run: Powershell.exe -File .\tests\examples_script_test.ps1 -Mode ${{ matrix.BUILD_TYPE }}

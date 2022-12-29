@@ -14,6 +14,8 @@ foreach(test_file ${SOURCES})
         PUBLIC Boost::unit_test_framework Boost::disable_autolinking
         fabric_error
         fabric_headers
+        fabric_ext
+        FabricClient
     )
     set_property(TARGET ${test_name} PROPERTY CXX_STANDARD 20)
     add_test(NAME ${test_name} COMMAND ${test_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
