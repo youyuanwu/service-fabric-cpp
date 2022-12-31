@@ -7,6 +7,7 @@
 
 #include "servicefabric/asio_callback.hpp"
 #include "servicefabric/fabric_client.hpp"
+#include "servicefabric/fabric_error.hpp"
 
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
@@ -105,10 +106,9 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client) {
   sf::AwaitableFabricQueryClient fc(client);
 
   auto f = [&]() -> net::awaitable<void> {
-    HRESULT lhr = S_OK;
     FABRIC_NODE_QUERY_DESCRIPTION node = {};
     belt::com::com_ptr<IFabricGetNodeListResult> result;
-    co_await fc.GetNodeList(&lhr, &node, result.put());
+    HRESULT lhr = co_await fc.GetNodeListExample(&node, result.put());
     BOOST_REQUIRE_EQUAL(lhr, S_OK);
     BOOST_REQUIRE_NE(result->get_NodeList(), nullptr);
   };
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client) {
     HRESULT lhr = S_OK;
     FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION query = {};
     belt::com::com_ptr<IFabricGetApplicationTypeListResult> result;
-    co_await fc.GetApplicationTypeList(&lhr, &query, result.put());
+    lhr = co_await fc.GetApplicationTypeList(&query, result.put());
     BOOST_REQUIRE_EQUAL(lhr, S_OK);
     BOOST_REQUIRE_NE(result->get_ApplicationTypeList(), nullptr);
   };
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client) {
     HRESULT lhr = S_OK;
     FABRIC_CLUSTER_HEALTH_POLICY query = {};
     belt::com::com_ptr<IFabricClusterHealthResult> result;
-    co_await hc.GetClusterHealth(&lhr, &query, result.put());
+    lhr = co_await hc.GetClusterHealth(&query, result.put());
     BOOST_REQUIRE_EQUAL(lhr, S_OK);
     BOOST_REQUIRE_NE(result->get_ClusterHealth(), nullptr);
   };
@@ -148,10 +148,21 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client) {
     HRESULT lhr = S_OK;
     std::wstring nodeName = L"_Node_0"; // This is the name in default cluster
     FABRIC_CLUSTER_HEALTH_POLICY query = {};
-    belt::com::com_ptr<IFabricNodeHealthResult> result;
-    co_await hc.GetNodeHealth(&lhr, nodeName.c_str(), &query, result.put());
-    BOOST_REQUIRE_EQUAL(lhr, S_OK);
-    BOOST_REQUIRE_NE(result->get_NodeHealth(), nullptr);
+    {
+      belt::com::com_ptr<IFabricNodeHealthResult> result;
+      lhr = co_await hc.GetNodeHealth(nodeName.c_str(), &query, result.put());
+      BOOST_REQUIRE_EQUAL(lhr, S_OK);
+      BOOST_REQUIRE_NE(result->get_NodeHealth(), nullptr);
+    }
+    // get a unknown node and check error
+    {
+      belt::com::com_ptr<IFabricNodeHealthResult> result;
+      lhr = co_await hc.GetNodeHealth(L"BadNodeName", &query, result.put());
+      BOOST_CHECK_MESSAGE(lhr == FABRIC_E_HEALTH_ENTITY_NOT_FOUND,
+                          "not found: " + sf::get_fabric_error_str(lhr));
+      BOOST_REQUIRE_EQUAL(lhr, FABRIC_E_HEALTH_ENTITY_NOT_FOUND);
+      BOOST_REQUIRE_EQUAL(result.get(), nullptr);
+    }
   };
   net::co_spawn(io_context, fhealth2, net::detached);
 

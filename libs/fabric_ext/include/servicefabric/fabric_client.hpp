@@ -10,30 +10,26 @@ namespace sf = servicefabric;
 
 template <typename IClient, typename BeginFunc, typename EndFunc,
           typename RetType, typename... TParams>
-boost::asio::awaitable<void> async_operation(IClient *client, BeginFunc bf,
-                                             EndFunc ef, HRESULT *hr,
-                                             RetType **ret, TParams... params) {
+boost::asio::awaitable<HRESULT> async_operation(IClient *client, BeginFunc bf,
+                                                EndFunc ef, RetType **ret,
+                                                TParams... params) {
   auto executor = co_await net::this_coro::executor;
-  HRESULT lhr = S_OK;
+  HRESULT hr = S_OK;
   // this is a obj holder
   belt::com::com_ptr<sf::IAwaitableCallback> callback =
       sf::AsioAwaitableCallback::create_instance(executor).to_ptr();
 
   belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
   // FABRIC_NODE_QUERY_DESCRIPTION node = {};
-  lhr = (*client.*bf)(params..., 1000, callback.get(), ctx.put());
-  if (lhr != S_OK) {
-    *hr = lhr;
-    co_return;
+  hr = (*client.*bf)(params..., 1000, callback.get(), ctx.put());
+  if (hr != S_OK) {
+    co_return hr;
   }
 
   co_await callback->await();
 
-  lhr = (*client.*ef)(ctx.get(), ret);
-  if (lhr != S_OK) {
-    *hr = lhr;
-    co_return;
-  }
+  hr = (*client.*ef)(ctx.get(), ret);
+  co_return hr;
 }
 
 class AwaitableFabricQueryClient {
@@ -42,19 +38,16 @@ public:
       : client_(client) {}
 
   // async api
-  boost::asio::awaitable<void>
-  GetNodeList(HRESULT *hr,
-              const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
+  boost::asio::awaitable<HRESULT>
+  GetNodeList(const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
               IFabricGetNodeListResult **ret);
 
   // example without template
-  boost::asio::awaitable<void>
-  GetNodeListExample(HRESULT *hr,
-                     const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
+  boost::asio::awaitable<HRESULT>
+  GetNodeListExample(const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
                      IFabricGetNodeListResult **ret);
 
-  boost::asio::awaitable<void> GetApplicationTypeList(
-      HRESULT *hr,
+  boost::asio::awaitable<HRESULT> GetApplicationTypeList(
       const FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION *queryDescription,
       IFabricGetApplicationTypeListResult **ret);
 
@@ -67,13 +60,12 @@ public:
   AwaitableFabricHealthClient(belt::com::com_ptr<IFabricHealthClient> client)
       : client_(client) {}
 
-  boost::asio::awaitable<void>
-  GetClusterHealth(HRESULT *hr,
-                   const FABRIC_CLUSTER_HEALTH_POLICY *queryDescription,
+  boost::asio::awaitable<HRESULT>
+  GetClusterHealth(const FABRIC_CLUSTER_HEALTH_POLICY *queryDescription,
                    IFabricClusterHealthResult **ret);
 
-  boost::asio::awaitable<void>
-  GetNodeHealth(HRESULT *hr, LPCWSTR nodeName,
+  boost::asio::awaitable<HRESULT>
+  GetNodeHealth(LPCWSTR nodeName,
                 const FABRIC_CLUSTER_HEALTH_POLICY *queryDescription,
                 IFabricNodeHealthResult **ret);
 

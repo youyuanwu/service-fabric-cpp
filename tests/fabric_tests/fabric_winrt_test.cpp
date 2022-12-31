@@ -54,6 +54,8 @@ BOOST_AUTO_TEST_CASE(test_winrt_waitable_callback) {
 
   auto action = f();
   action.get();
+
+  winrt::uninit_apartment();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
