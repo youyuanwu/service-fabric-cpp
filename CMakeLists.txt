@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(service-fabric)
+project(service-fabric LANGUAGES C CXX)
 
 # hack
 set(Boost_NO_WARN_NEW_VERSIONS 1)

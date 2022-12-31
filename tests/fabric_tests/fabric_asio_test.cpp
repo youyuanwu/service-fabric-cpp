@@ -14,7 +14,7 @@
 namespace sf = servicefabric;
 namespace net = boost::asio;
 
-BOOST_AUTO_TEST_SUITE(test_fabric_error)
+BOOST_AUTO_TEST_SUITE(test_fabric_asio)
 
 BOOST_AUTO_TEST_CASE(test_asio_callback) {
   belt::com::com_ptr<IFabricQueryClient> client;
@@ -112,8 +112,6 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client) {
     BOOST_REQUIRE_EQUAL(lhr, S_OK);
     BOOST_REQUIRE_NE(result->get_NodeList(), nullptr);
   };
-
-  // net::co_spawn(io_context, , net::detached);
 
   net::co_spawn(io_context, f, net::detached);
 
