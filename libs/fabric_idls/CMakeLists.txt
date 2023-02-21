@@ -67,7 +67,7 @@ add_library(fabric_uuids STATIC
 message(STATUS "fetching coan")
 include(FetchContent)
 FetchContent_Declare(coan
-  URL https://cfhcable.dl.sourceforge.net/project/coan2/v6.0.1/coan-6.0.1-x86_64.exe
+  URL https://pilotfiber.dl.sourceforge.net/project/coan2/v6.0.1/coan-6.0.1-x86_64.exe
   URL_HASH MD5=d2a75c99b45b85e1cfb6e2864395e55b
   DOWNLOAD_NO_EXTRACT TRUE
 )
