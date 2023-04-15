@@ -26,6 +26,5 @@ target_include_directories(fabric_error
 )
 target_link_libraries(fabric_error
   PRIVATE magic_enum
-  PRIVATE fabric_headers
-  PRIVATE fabric_uuids
+  PRIVATE fabric_sdk
 )

@@ -10,12 +10,11 @@ add_executable(${_test_name} ${_test_name}.cpp)
 
 target_link_libraries(${_test_name}
     PUBLIC Boost::unit_test_framework Boost::disable_autolinking
-    fabric_internal_headers
-    fabric_internal_uuids
     FabricServiceCommunication
     moderncom
     fabric_error
     fabric_ext
+    fabric_internal_sdk
 )
 
 target_compile_definitions(${_test_name}

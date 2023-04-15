@@ -13,10 +13,8 @@ target_include_directories(${_lib_name}
 )
 target_link_libraries(${_lib_name}
   INTERFACE Boost::disable_autolinking Boost::headers
-  PUBLIC    moderncom
-  PUBLIC    fabric_internal_headers
-  PUBLIC    Boost::log
-  PUBLIC    fabric_internal_uuids
+  PUBLIC    moderncom  PUBLIC    Boost::log
+  PUBLIC    fabric_internal_sdk 
   PRIVATE   fabric_ext # for async_contxt
 )
 

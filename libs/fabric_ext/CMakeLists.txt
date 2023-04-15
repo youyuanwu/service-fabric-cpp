@@ -11,12 +11,8 @@ target_include_directories(fabric_ext
 target_link_libraries(fabric_ext
   INTERFACE Boost::disable_autolinking Boost::headers
   PUBLIC moderncom
-  PUBLIC fabric_headers
+  PUBLIC fabric_sdk
   PUBLIC    Boost::log
-  PUBLIC    fabric_uuids
-  # PUBLIC    FabricRuntime
-  # PUBLIC    FabricClient
-  # PUBLIC    FabricResources
 )
 
 #add_dependencies(fabric_ext fabric_import_libs) # make sure import libs are generated

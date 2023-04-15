@@ -19,6 +19,19 @@ if(${service_fabric_MAIN_PROJECT})
 include(cmake/clang-format.cmake)
 endif(${service_fabric_MAIN_PROJECT})
 
+message(STATUS "fetching fabric_metadata")
+include(FetchContent)
+FetchContent_Declare(fabric_metadata
+    GIT_REPOSITORY https://github.com/youyuanwu/fabric-metadata.git
+    GIT_TAG 765e4549eb1898bd5b9d209de01c5bcbb11d1b24
+)
+FetchContent_GetProperties(fabric_metadata)
+if(NOT fabric_metadata_POPULATED)
+    FetchContent_Populate(fabric_metadata)
+    add_subdirectory(${fabric_metadata_SOURCE_DIR} ${fabric_metadata_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+
 add_subdirectory(libs)
 
 if(service_fabric_BuildExamples)
