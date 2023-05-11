@@ -10,6 +10,7 @@ file(GLOB_RECURSE ALL_SOURCE_FILES
     tests/*.ixx
     libs/*.cpp
     libs/*.hpp
+    libs/*.h
     libs/*.ixx
     src/*.cpp
     src/*.hpp

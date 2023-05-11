@@ -30,6 +30,7 @@ target_compile_definitions(moderncom
 set(Boost_USE_STATIC_LIBS ON) # use static boost
 find_package(Boost REQUIRED COMPONENTS log) # log is used for tests
 
+add_subdirectory(fabric_common)
 # main extension lib
 add_subdirectory(fabric_ext)
 # internal extension lib

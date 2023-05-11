@@ -5,3 +5,4 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework ) # log is used for t
 add_subdirectory(fabric_tests)
 add_subdirectory(service_communication)
 add_subdirectory(fabric_transport)
+add_subdirectory(fabric_common_tests)
