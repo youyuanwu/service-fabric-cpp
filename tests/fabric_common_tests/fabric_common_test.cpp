@@ -11,7 +11,7 @@
 // license information.
 // ------------------------------------------------------------
 
-#define BOOST_TEST_MODULE fabric_asio_tests
+#define BOOST_TEST_MODULE fabric_common_test
 
 #include "AsyncOperation.h"
 #include "ComAsyncOperationContext.h"
@@ -35,7 +35,9 @@ public:
     std::hash<std::thread::id> hash{};
     std::size_t id = hash(std::this_thread::get_id());
     std::lock_guard<std::mutex> lk(mtx_);
-    std::cout << "[" << id << "] " << msg << std::endl;
+    DBG_UNREFERENCED_LOCAL_VARIABLE(id);
+    // uncomment for debugging.
+    // std::cout << "[" << id << "] " << msg << std::endl;
   }
 
 private:
@@ -43,13 +45,6 @@ private:
 };
 
 static std::unique_ptr<TestLogger> GLogger = std::make_unique<TestLogger>();
-
-// class exampleOp : public Common::AsyncOperation {
-// public:
-//   void OnStart(Common::AsyncOperationSPtr const &thisSPtr) override {
-//     GLogger->Write("OnStart called");
-//   }
-// };
 
 using namespace Common;
 
@@ -104,8 +99,6 @@ public:
     return CompletedAsyncOperation::End(fooC22Operation);
   }
 };
-
-class FooB1AsyncOperation;
 
 class ComponentB : RootedObject {
   DENY_COPY(ComponentB)
