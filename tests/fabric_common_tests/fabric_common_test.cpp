@@ -1,3 +1,16 @@
+// ------------------------------------------------------------
+// Copyright 2023 Youyuan Wu
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
+// ------------------------------------------------------------
+
+// Some of the original code has the following license
+// ------------------------------------------------------------
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
+// ------------------------------------------------------------
+
 #define BOOST_TEST_MODULE fabric_asio_tests
 
 #include "AsyncOperation.h"

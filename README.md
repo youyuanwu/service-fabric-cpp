@@ -1,4 +1,6 @@
 # service fabric cpp
+![ci](https://github.com/youyuanwu/service-fabric-cpp/actions/workflows/build.yaml/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/youyuanwu/service-fabric-cpp/main/LICENSE)
 
 Service Fabric C++ Community SDK.
 
@@ -34,3 +36,6 @@ When building this repo on an machine with service fabric developer cluster star
 .\tests\echo_script_test.ps1
 ```
 Creates Echo app in the cluster, and makes an tcp echo call, then finally removes the app.
+
+## License
+MIT License

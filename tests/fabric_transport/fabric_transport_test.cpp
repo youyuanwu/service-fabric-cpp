@@ -1,3 +1,9 @@
+// ------------------------------------------------------------
+// Copyright 2022 Youyuan Wu
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
+// ------------------------------------------------------------
+
 #define BOOST_TEST_MODULE service_communication
 
 #include <boost/test/unit_test.hpp>
