@@ -52,9 +52,13 @@ public:
   static AsyncOperationSPtr
   CreateAsyncOperationMultiRoot(std::vector<ComponentRootSPtr> &&roots);
 
-  virtual void TraceTrackedReferences() const;
-  void TryStartLeakDetectionTimer();
+  // virtual void TraceTrackedReferences() const;
+  // void TryStartLeakDetectionTimer();
   // void TryStartLeakDetectionTimer(TimeSpan const);
+
+  // write all stack references for debugging. This includes the stacktrace of
+  // where the references were constructed.
+  void WriteDebugReferences(std::ostream &o);
 
   // virtual void WriteTo(Common::TextWriter & w, Common::FormatOptions const &)
   // const;
@@ -70,7 +74,7 @@ protected:
 private:
   class ReferenceTracker;
 
-  static void LeakDetectionTimerCallback(ComponentRootWPtr const &);
+  // static void LeakDetectionTimerCallback(ComponentRootWPtr const &);
 
   std::wstring traceId_;
   std::unique_ptr<ReferenceTracker> referenceTracker_;

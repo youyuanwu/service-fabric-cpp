@@ -6,6 +6,7 @@
 
 #define AcquireExclusiveLock std::lock_guard<std::mutex>
 #define AcquireWriteLock std::lock_guard<std::mutex>
+#define AcquireReadLock std::lock_guard<std::mutex>
 #define RwLock std::mutex
 #define atomic_uint64 std::atomic<uint64_t>
 #define CODING_ERROR_ASSERT assert

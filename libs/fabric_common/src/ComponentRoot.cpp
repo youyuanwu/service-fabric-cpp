@@ -7,6 +7,8 @@
 #include "ComponentRoot.h"
 #include "stdafx.h"
 #include <functional>
+#include <iostream>
+#include <stacktrace>
 #include <unordered_map>
 
 #define uint64 uint64_t
@@ -29,11 +31,13 @@ public:
       : ComponentRoot(false) // enableReferenceTracking
         ,
         root_(move(root)), id_(id), callback_(callback)
-  //, timestamp_(DateTime::Now())
-  //, stack_()
-  {
+        //, timestamp_(DateTime::Now())
+        ,
+        stack_() {
     SetTraceId(root_->TraceId);
     // stack_.CaptureCurrentPosition();
+    timestamp_ = std::chrono::system_clock::now();
+    stack_ = stack_.current(); // save current stack trace
   }
 
   virtual ~ComponentRootReference() {
@@ -41,9 +45,9 @@ public:
     callback_ = 0;
   }
 
-  void TraceTrackedReferences() const override {
-    root_->TraceTrackedReferences();
-  }
+  // void TraceTrackedReferences() const override {
+  //   root_->TraceTrackedReferences();
+  // }
 
   // void WriteTo(TextWriter& w, FormatOptions const&) const override
   // {
@@ -53,12 +57,22 @@ public:
   //         stack_);
   // }
 
+  // write stack to ostream
+  friend std::ostream &operator<<(std::ostream &o,
+                                  const ComponentRootReference &self) {
+    auto time = std::chrono::system_clock::to_time_t(self.timestamp_);
+    o << "[time=" << time << "]\n" << self.stack_;
+    return o;
+  }
+
 private:
   ComponentRootSPtr root_;
   uint64 id_;
   ReleaseCallback callback_;
   // DateTime timestamp_;
+  std::chrono::system_clock::time_point timestamp_;
   // StackTrace stack_;
+  std::stacktrace stack_;
 };
 
 //
@@ -115,6 +129,37 @@ public:
   //     }
   // }
 
+  // write all ref to ostream
+  friend std::ostream &operator<<(std::ostream &o,
+                                  const ReferenceTracker &self) {
+    unordered_map<uint64, ComponentRootSPtr> referencesCopy;
+    {
+      AcquireReadLock lock(self.lock_);
+
+      for (auto const &reference : self.references_) {
+        auto sptr = reference.second.lock();
+
+        if (sptr.get() != nullptr) {
+          referencesCopy[reference.first] = sptr;
+        }
+      }
+    }
+
+    // w.Write("count={0}\n", referencesCopy.size());
+    o << "count=" << referencesCopy.size() << "\n";
+
+    for (auto const &referenceEntry : referencesCopy) {
+      const std::shared_ptr<const ComponentRoot> reference =
+          referenceEntry.second;
+      const std::shared_ptr<const ComponentRootReference> ref =
+          std::dynamic_pointer_cast<const ComponentRootReference>(reference);
+      if (ref) {
+        o << "ref stacktrace:\n" << (*(ref)) << "\n";
+      }
+    }
+    return o;
+  }
+
 private:
   void OnReleaseReference(uint64 id) {
     AcquireWriteLock lock(lock_);
@@ -158,6 +203,8 @@ ComponentRoot::~ComponentRoot() {
 
   //     leakDetectionTimer_->Cancel();
   // }
+
+  // yy: maybe ref tracker need to assert no dangling ref present.
 }
 
 ComponentRootSPtr ComponentRoot::CreateComponentRoot() const {
@@ -177,22 +224,30 @@ AsyncOperationSPtr ComponentRoot::CreateAsyncOperationMultiRoot(
       std::move(roots));
 }
 
-void ComponentRoot::TraceTrackedReferences() const {
-  // if (leakDetectionTimer_.get() != nullptr)
-  // {
-  //     leakDetectionTimer_->Cancel();
-  // }
+// void ComponentRoot::TraceTrackedReferences() const {
+// if (leakDetectionTimer_.get() != nullptr)
+// {
+//     leakDetectionTimer_->Cancel();
+// }
 
-  // if (referenceTracker_.get() == nullptr)
-  // {
-  //     Trace.WriteWarning(ComponentRootTraceType, "{0} TraceTrackedReferences:
-  //     Reference tracking is disabled", this->TraceId);
-  // }
-  // else
-  // {
-  //     Trace.WriteError(ComponentRootTraceType, "{0} Outstanding references:
-  //     {1}", this->TraceId, *referenceTracker_);
-  // }
+// if (referenceTracker_.get() == nullptr)
+// {
+//     Trace.WriteWarning(ComponentRootTraceType, "{0} TraceTrackedReferences:
+//     Reference tracking is disabled", this->TraceId);
+// }
+// else
+// {
+//     Trace.WriteError(ComponentRootTraceType, "{0} Outstanding references:
+//     {1}", this->TraceId, *referenceTracker_);
+// }
+// }
+
+void ComponentRoot::WriteDebugReferences(std::ostream &o) {
+  if (referenceTracker_.get() == nullptr) {
+    o << "referenceTracker not enabled.\n";
+  } else {
+    o << *referenceTracker_;
+  }
 }
 
 // void ComponentRoot::TryStartLeakDetectionTimer()
@@ -221,16 +276,17 @@ void ComponentRoot::TraceTrackedReferences() const {
 //     }
 // }
 
-void ComponentRoot::LeakDetectionTimerCallback(
-    ComponentRootWPtr const &thisWPtr) {
-  auto thisSPtr = thisWPtr.lock();
-  if (thisSPtr.get() != nullptr) {
-    // Trace.WriteWarning(ComponentRootTraceType, "{0} Possible leak detected",
-    // thisSPtr->TraceId);
+// void ComponentRoot::LeakDetectionTimerCallback(
+//     ComponentRootWPtr const &thisWPtr) {
+//   auto thisSPtr = thisWPtr.lock();
+//   if (thisSPtr.get() != nullptr) {
+//     // Trace.WriteWarning(ComponentRootTraceType, "{0} Possible leak
+//     detected",
+//     // thisSPtr->TraceId);
 
-    thisSPtr->TraceTrackedReferences();
-  }
-}
+//     thisSPtr->TraceTrackedReferences();
+//   }
+// }
 
 // void ComponentRoot::WriteTo(Common::TextWriter & w, Common::FormatOptions
 // const &) const

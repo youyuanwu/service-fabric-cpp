@@ -334,7 +334,8 @@ class ComponentA : public ComponentRoot {
   DENY_COPY(ComponentA)
 
 public:
-  ComponentA() : ComponentRoot() {
+  ComponentA(bool enableReferenceTracking = false)
+      : ComponentRoot(enableReferenceTracking) {
     componentB = std::make_unique<ComponentB>(*this);
   }
 
@@ -722,6 +723,32 @@ BOOST_AUTO_TEST_CASE(basic_com_proxy_test) {
     sync.count_down();
   }
   sync.wait();
+}
+
+BOOST_AUTO_TEST_CASE(basic_reference_stack_test) {
+  // make componentA
+  std::shared_ptr<ComponentA> componentA =
+      std::make_shared<ComponentA>(true /*enable reference tracking*/);
+
+  // Each time CreateComponentRoot is called, the stack location is recorded.
+  // This helps to diagnose reference lifetime or leaks of the RootedObject,
+  // tied to the shared_ptr.
+
+  // Windows memory leak checker in debug mode can catch mem leak.
+  // Maybe the RootedObject is a reference framework to track references to the
+  // obj inside shared_ptr. And the framework
+
+  {
+    Common::RootedObjectPointer<ComponentA> impl(
+        componentA.get(), componentA->CreateComponentRoot());
+
+    Common::RootedObjectPointer<ComponentA> impl2(
+        componentA.get(), componentA->CreateComponentRoot());
+
+    // componentA->WriteDebugReferences(std::cout);
+  }
+  std::cout << "Reference cleared" << std::endl;
+  componentA->WriteDebugReferences(std::cout);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

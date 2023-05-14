@@ -1,5 +1,7 @@
 # code extracted from sf repo for easy reuse.
 
+set (CMAKE_CXX_STANDARD 23) # for stacktrace
+
 file(GLOB_RECURSE SOURCES
 *.cpp
 *.h

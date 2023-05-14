@@ -9,6 +9,7 @@
 #include "combaseapi.h"
 #include "stdafx.h"
 #include <cassert>
+#include <utility> // std::move for cpp23
 
 namespace Common {
 template <class TComInterface> class ComPointer {
