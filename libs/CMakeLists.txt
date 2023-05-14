@@ -37,3 +37,4 @@ add_subdirectory(fabric_ext)
 add_subdirectory(fabric_internal_ext)
 # magic error string lib
 add_subdirectory(fabric_error)
+add_subdirectory(fabric_ext2)

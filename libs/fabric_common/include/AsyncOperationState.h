@@ -56,7 +56,7 @@ private:
   LONG ObserveState() const;
 
   // mutable Common::atomic_long operationState_;
-  mutable std::atomic<LONG> operationState_;
+  mutable std::atomic_long operationState_;
 
   static const LONG Created = 0x01;
   static const LONG Started = 0x02;

@@ -63,35 +63,36 @@ public:
   bool TryComplete(AsyncOperationSPtr const &proxySPtr, HRESULT result = S_OK);
   bool TryComplete(AsyncOperationSPtr const &proxySPtr, ErrorCode const &);
 
-  template <class TOperation>
-  static HRESULT
-  InitializeAndComplete(ErrorCode const &error,
-                        __in ComPointer<TOperation> &&operationCPtr,
-                        __in_opt IFabricAsyncOperationCallback *callback,
-                        __out IFabricAsyncOperationContext **context) {
-    ComponentRootSPtr rootSPtr;
-    auto hr = operationCPtr->CreateComComponentRoot(rootSPtr);
-    if (FAILED(hr)) {
-      return hr;
-    }
+  // This is not used in entire SF
+  // template <class TOperation>
+  // static HRESULT
+  // InitializeAndComplete(ErrorCode const &error,
+  //                       __in ComPointer<TOperation> &&operationCPtr,
+  //                       __in_opt IFabricAsyncOperationCallback *callback,
+  //                       __out IFabricAsyncOperationContext **context) {
+  //   ComponentRootSPtr rootSPtr;
+  //   auto hr = operationCPtr->CreateComComponentRoot(rootSPtr);
+  //   if (FAILED(hr)) {
+  //     return hr;
+  //   }
 
-    ComAsyncOperationContextCPtr baseCPtr;
-    baseCPtr.SetNoAddRef(operationCPtr.DetachNoRelease());
+  //   ComAsyncOperationContextCPtr baseCPtr;
+  //   baseCPtr.SetNoAddRef(operationCPtr.DetachNoRelease());
 
-    hr = baseCPtr->Initialize(rootSPtr, callback);
-    if (FAILED(hr)) {
-      return hr;
-    }
+  //   hr = baseCPtr->Initialize(rootSPtr, callback);
+  //   if (FAILED(hr)) {
+  //     return hr;
+  //   }
 
-    baseCPtr->state_.TransitionStarted();
+  //   baseCPtr->state_.TransitionStarted();
 
-    auto proxySPtr =
-        AsyncOperationRoot<ComAsyncOperationContextCPtr>::Create(baseCPtr);
-    baseCPtr->TryComplete(proxySPtr, error);
+  //   auto proxySPtr =
+  //       AsyncOperationRoot<ComAsyncOperationContextCPtr>::Create(baseCPtr);
+  //   baseCPtr->TryComplete(proxySPtr, error);
 
-    *context = baseCPtr.DetachNoRelease();
-    return S_OK;
-  }
+  //   *context = baseCPtr.DetachNoRelease();
+  //   return S_OK;
+  // }
 
   template <class TOperation>
   static HRESULT StartAndDetach(__in ComPointer<TOperation> &&operation,
