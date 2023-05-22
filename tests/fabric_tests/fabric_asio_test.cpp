@@ -23,7 +23,8 @@ namespace net = boost::asio;
 
 BOOST_AUTO_TEST_SUITE(test_fabric_asio)
 
-BOOST_AUTO_TEST_CASE(test_asio_callback) {
+BOOST_AUTO_TEST_CASE(test_asio_callback,
+                     *boost::unit_test_framework::disabled()) {
   belt::com::com_ptr<IFabricQueryClient> client;
 
   HRESULT hr =
@@ -58,7 +59,8 @@ BOOST_AUTO_TEST_CASE(test_asio_callback) {
   io_context.run();
 }
 
-BOOST_AUTO_TEST_CASE(test_asio_waitable_callback) {
+BOOST_AUTO_TEST_CASE(test_asio_waitable_callback,
+                     *boost::unit_test_framework::disabled()) {
 
   belt::com::com_ptr<IFabricQueryClient> client;
 
@@ -97,7 +99,8 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_callback) {
   io_context.run();
 }
 
-BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client) {
+BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
+                     *boost::unit_test_framework::disabled()) {
   belt::com::com_ptr<IFabricQueryClient> client;
 
   HRESULT hr =

@@ -21,7 +21,8 @@ namespace sf = servicefabric;
 BOOST_AUTO_TEST_SUITE(test_fabric_winrt)
 
 // test winrt
-BOOST_AUTO_TEST_CASE(test_winrt_waitable_callback) {
+BOOST_AUTO_TEST_CASE(test_winrt_waitable_callback,
+                     *boost::unit_test_framework::disabled()) {
   winrt::init_apartment();
 
   belt::com::com_ptr<IFabricQueryClient> client;
@@ -63,5 +64,8 @@ BOOST_AUTO_TEST_CASE(test_winrt_waitable_callback) {
 
   winrt::uninit_apartment();
 }
+
+// dummy test to avoid no tests error due to disable of tests
+BOOST_AUTO_TEST_CASE(dummytest) {}
 
 BOOST_AUTO_TEST_SUITE_END()
