@@ -226,6 +226,9 @@ struct ctxpayload {
 
 class appInstanceImpl {
 public:
+  appInstanceImpl(net::io_context &io_context) : io_context_(io_context) {}
+
+  // coro backend api impl
   boost::asio::awaitable<HRESULT>
   Open(IFabricStatelessServicePartition *partition,
        IFabricStringResult **serviceAddress) {
@@ -235,12 +238,28 @@ public:
     co_return S_OK;
   }
   boost::asio::awaitable<HRESULT> Close() { co_return S_OK; }
+
+  // callback backend api impl
+  // token type void(ec, std::string reply)
+  // msg is repeated.
+  template <typename Token>
+  auto ProcessMessage(std::string data, Token &&token) {
+    std::function<void(void)> f = [data, token = std::move(token)]() {
+      token({}, std::string(data) + std::string(data));
+    };
+    return net::post(io_context_, std::move(f));
+  }
+
+private:
+  net::io_context &io_context_;
 };
 
+// wrapped coro api.
 class appInstance
     : public belt::com::object<appInstance, IFabricStatelessServiceInstance> {
 public:
-  appInstance(net::io_context &io_context) : io_context_(io_context) {}
+  appInstance(net::io_context &io_context)
+      : io_context_(io_context), impl_(io_context) {}
 
   HRESULT STDMETHODCALLTYPE BeginOpen(
       /* [in] */ IFabricStatelessServicePartition *partition,
@@ -318,6 +337,55 @@ private:
   appInstanceImpl impl_;
 };
 
+// example of converting callback style api to begin/end style api.
+class appInstance2 {
+public:
+  appInstance2(net::io_context &io_context)
+      : io_context_(io_context), impl_(io_context) {}
+
+  HRESULT BeginProcessMessage(
+      std::string data,
+      /* [in] */ IFabricAsyncOperationCallback *callback,
+      /* [retval][out] */ IFabricAsyncOperationContext **context) {
+    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
+        myctx::create_instance().to_ptr();
+    belt::com::com_ptr<IFabricAsyncOperationCallback> cb(callback);
+
+    // copy to output
+    ctx.get()->AddRef();
+    *context = ctx.get();
+
+    impl_.ProcessMessage(
+        data, [ctx, cb](boost::system::error_code ec, std::string reply) {
+          // TODO : pass on ec. But in this example ec is not used.
+          UNREFERENCED_PARAMETER(ec);
+
+          std::any a = std::move(reply);
+          auto cctx = dynamic_cast<myctx *>(ctx.get());
+          assert(cctx != nullptr);
+          cctx->SetAny(std::move(a));
+          cb->Invoke(cctx);
+        });
+    return S_OK;
+  }
+
+  HRESULT EndProcessMessage(
+      /* [in] */ IFabricAsyncOperationContext *context, std::string *reply) {
+    UNREFERENCED_PARAMETER(context);
+    auto cctx = dynamic_cast<myctx *>(context);
+    assert(cctx != nullptr);
+    std::any &content = cctx->GetAny();
+    std::string reply_a = std::any_cast<std::string>(content);
+
+    *reply = reply_a;
+    return S_OK;
+  }
+
+private:
+  net::io_context &io_context_;
+  appInstanceImpl impl_;
+};
+
 BOOST_AUTO_TEST_SUITE(test_fabric_asio2)
 
 BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
@@ -332,6 +400,7 @@ BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
 
   // use waitable ctx
   auto f = [&]() {
+    // test coro backend api.
     belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
         sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
 
@@ -350,15 +419,36 @@ BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
                   std::wstring(L"myaddress"));
   };
 
+  std::latch lch2(1);
+  auto f2 = [&]() {
+    // test callback backend api
+    appInstance2 app2(ioc);
+    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+
+    HRESULT hr = app2.BeginProcessMessage("hello", callback.get(), ctx.put());
+    lch2.count_down();
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
+    callback->Wait();
+    std::string reply;
+    hr = app2.EndProcessMessage(ctx.get(), &reply);
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
+    BOOST_REQUIRE_EQUAL("hellohello", reply);
+  };
+
   // start the operation
   std::jthread th(f);
+  std::jthread th2(f2);
 
   std::jthread th_io([&]() {
     lch.wait();
+    lch2.wait();
     ioc.run();
   });
 
   th.join();
+  th2.join();
   th_io.join();
 }
 
