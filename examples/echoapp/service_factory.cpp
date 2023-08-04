@@ -38,8 +38,8 @@ HRESULT STDMETHODCALLTYPE service_factory::CreateInstance(
                            << "instanceId " << instanceId;
 
   // create a instance and return
-  belt::com::com_ptr<IFabricStatelessServiceInstance> instance =
-      app_instance::create_instance(port_, hostname_).to_ptr();
+  winrt::com_ptr<IFabricStatelessServiceInstance> instance =
+      winrt::make<app_instance>(port_, hostname_);
 
   *serviceInstance = instance.detach();
   return NO_ERROR;

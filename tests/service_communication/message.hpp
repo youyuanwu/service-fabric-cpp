@@ -8,14 +8,14 @@
 
 #include "fabricservicecommunication_.h"
 #include "servicefabric/async_context.hpp"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 #include <string>
 
 // namespace sf = servicefabric;
 
 class message
-    : public belt::com::object<message, IFabricServiceCommunicationMessage> {
+    : public winrt::implements<message, IFabricServiceCommunicationMessage> {
 public:
   message(std::string body, std::string headers)
       : body_(body), headers_(headers), body_ret_(), headers_ret_() {}

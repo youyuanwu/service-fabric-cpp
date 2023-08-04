@@ -12,15 +12,13 @@
 
 #include <servicefabric/waitable_callback.hpp>
 
-#include <moderncom/interfaces.h>
-
 #include <thread>
 
 namespace sf = servicefabric;
 
 int main() {
 
-  belt::com::com_ptr<IFabricQueryClient> client;
+  winrt::com_ptr<IFabricQueryClient> client;
 
   std::wstring conn = L"hello";
   HRESULT hr =
@@ -33,13 +31,13 @@ int main() {
 
   std::cout << "FabricCreateLocalClient success" << std::endl;
 
-  // belt::com::com_ptr<IFabricAsyncOperationCallback> callback =
+  // winrt::com_ptr<IFabricAsyncOperationCallback> callback =
   // MyCallback::create_instance(client).to_ptr();
 
-  belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-      sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+  winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+      winrt::make<sf::FabricAsyncOperationWaitableCallback>();
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
   FABRIC_NODE_QUERY_DESCRIPTION node = {};
   hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
@@ -49,7 +47,7 @@ int main() {
   }
   callback->Wait();
 
-  belt::com::com_ptr<IFabricGetNodeListResult> result;
+  winrt::com_ptr<IFabricGetNodeListResult> result;
   hr = client->EndGetNodeList(ctx.get(), result.put());
   if (hr != NO_ERROR) {
     std::cout << "EndGetNodeList failed: " << hr << std::endl;

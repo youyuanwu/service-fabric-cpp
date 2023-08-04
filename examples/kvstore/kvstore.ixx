@@ -8,7 +8,7 @@ module;
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
 #include <boost/log/trivial.hpp>
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 #include <servicefabric/activation_helpers.hpp>
 #include <servicefabric/async_context.hpp>
@@ -24,9 +24,9 @@ import kvtransport;
 namespace sf = servicefabric;
 
 class kv_replica
-    : public belt::com::object<kv_replica, IFabricStatefulServiceReplica> {
+    : public winrt::implements<kv_replica, IFabricStatefulServiceReplica> {
 public:
-  kv_replica(belt::com::com_ptr<IFabricKeyValueStoreReplica2> store,
+  kv_replica(winrt::com_ptr<IFabricKeyValueStoreReplica2> store,
              std::shared_ptr<kv_server> server)
       : store_(store), server_(std::move(server)),
         role_(FABRIC_REPLICA_ROLE_UNKNOWN) {}
@@ -112,15 +112,15 @@ public:
     if (role_ == FABRIC_REPLICA_ROLE_PRIMARY) {
       std::wstring addr = server_->get_listening_addr();
       // set replica addr to be the transport addr
-      belt::com::com_ptr<IFabricStringResult> transport_addr =
+      winrt::com_ptr<IFabricStringResult> transport_addr =
           sf::string_result::create_instance(addr).to_ptr();
       *serviceAddress = transport_addr.detach();
     } else {
-      belt::com::com_ptr<IFabricStringResult> transport_addr =
+      winrt::com_ptr<IFabricStringResult> transport_addr =
           sf::string_result::create_instance(L"unknown_addr").to_ptr();
       *serviceAddress = transport_addr.detach();
     }
-    belt::com::com_ptr<IFabricStringResult> store_address;
+    winrt::com_ptr<IFabricStringResult> store_address;
     hr = store_->EndChangeRole(context, store_address.put());
     if (hr == S_OK) {
       BOOST_LOG_TRIVIAL(debug) << "kv_replica::EndChangeRole store_address: "
@@ -153,13 +153,13 @@ public:
   }
 
 private:
-  belt::com::com_ptr<IFabricKeyValueStoreReplica2> store_;
+  winrt::com_ptr<IFabricKeyValueStoreReplica2> store_;
   std::shared_ptr<kv_server> server_;
   FABRIC_REPLICA_ROLE role_;
 };
 
 class datastore_event_handler
-    : public belt::com::object<datastore_event_handler,
+    : public winrt::implements<datastore_event_handler,
                                IFabricStoreEventHandler> {
 public:
   void STDMETHODCALLTYPE OnDataLoss(void) override {
@@ -176,14 +176,14 @@ public:
 export class sf_resolver : public resolver {
 public:
   sf_resolver(
-      belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx)
+      winrt::com_ptr<IFabricCodePackageActivationContext> activation_ctx)
       : activation_ctx_(activation_ctx) {}
   HRESULT get_port(std::wstring endpoint_name, ULONG &port) override {
     return sf::get_port(activation_ctx_, endpoint_name, port);
   }
 
 private:
-  belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx_;
+  winrt::com_ptr<IFabricCodePackageActivationContext> activation_ctx_;
 };
 
 export class dummy_resolver : public resolver {
@@ -205,7 +205,7 @@ public:
 const std::wstring KeyValueStoreName = L"kvstoreKeyValueStore";
 
 export class service_factory
-    : public belt::com::object<service_factory, IFabricStatefulServiceFactory> {
+    : public winrt::implements<service_factory, IFabricStatefulServiceFactory> {
 
 public:
   service_factory(std::shared_ptr<resolver> resolver, std::wstring hostname)
@@ -262,7 +262,7 @@ public:
     replicatorSettings.Reserved = NULL;
 
     // open kv store backend
-    belt::com::com_ptr<IFabricKeyValueStoreReplica2> store;
+    winrt::com_ptr<IFabricKeyValueStoreReplica2> store;
     hr = FabricCreateKeyValueStoreReplica(
         IID_IFabricKeyValueStoreReplica2, KeyValueStoreName.c_str(),
         partitionId, replicaId, &replicatorSettings,
@@ -278,15 +278,15 @@ public:
     std::shared_ptr<kv_server> svr =
         std::make_shared<kv_server>(hostname_, transport_port);
 
-    belt::com::com_ptr<IFabricStatefulServiceReplica> replica =
+    winrt::com_ptr<IFabricStatefulServiceReplica> replica =
         kv_replica::create_instance(store, svr).to_ptr();
     *serviceReplica = replica.detach();
     return S_OK;
   }
 
 private:
-  // belt::com::com_ptr<IFabricCodePackageActivationContext> activation_ctx_;
+  // winrt::com_ptr<IFabricCodePackageActivationContext> activation_ctx_;
   std::shared_ptr<resolver> resolver_;
   std::wstring hostname_;
-  belt::com::com_ptr<IFabricStoreEventHandler> event_handler_;
+  winrt::com_ptr<IFabricStoreEventHandler> event_handler_;
 };

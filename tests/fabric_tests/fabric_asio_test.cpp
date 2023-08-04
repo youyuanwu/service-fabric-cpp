@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_SUITE(test_fabric_asio)
 
 BOOST_AUTO_TEST_CASE(test_asio_callback,
                      *boost::unit_test_framework::disabled()) {
-  belt::com::com_ptr<IFabricQueryClient> client;
+  winrt::com_ptr<IFabricQueryClient> client;
 
   HRESULT hr =
       ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(test_asio_callback,
   net::io_context io_context;
 
   auto lamda_callback = [client](IFabricAsyncOperationContext *ctx) {
-    belt::com::com_ptr<IFabricGetNodeListResult> result;
+    winrt::com_ptr<IFabricGetNodeListResult> result;
     HRESULT hr = client->EndGetNodeList(ctx, result.put());
 
     BOOST_REQUIRE_EQUAL(hr, S_OK);
@@ -46,12 +46,10 @@ BOOST_AUTO_TEST_CASE(test_asio_callback,
     BOOST_CHECK_NE(nodes, nullptr);
   };
 
-  belt::com::com_ptr<IFabricAsyncOperationCallback> callback =
-      sf::AsioCallback::create_instance(lamda_callback,
-                                        io_context.get_executor())
-          .to_ptr();
+  winrt::com_ptr<IFabricAsyncOperationCallback> callback =
+      winrt::make<sf::AsioCallback>(lamda_callback, io_context.get_executor());
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
   FABRIC_NODE_QUERY_DESCRIPTION node = {};
   hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
   BOOST_REQUIRE_EQUAL(hr, S_OK);
@@ -62,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_asio_callback,
 BOOST_AUTO_TEST_CASE(test_asio_waitable_callback,
                      *boost::unit_test_framework::disabled()) {
 
-  belt::com::com_ptr<IFabricQueryClient> client;
+  winrt::com_ptr<IFabricQueryClient> client;
 
   HRESULT hr =
       ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
@@ -73,17 +71,17 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_callback,
     auto executor = co_await net::this_coro::executor;
     HRESULT hr = S_OK;
     // this is a obj holder
-    belt::com::com_ptr<sf::IAwaitableCallback> callback =
-        sf::AsioAwaitableCallback::create_instance(executor).to_ptr();
+    winrt::com_ptr<sf::IAwaitableCallback> callback =
+        winrt::make<sf::AsioAwaitableCallback>(executor);
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     FABRIC_NODE_QUERY_DESCRIPTION node = {};
     hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
 
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     co_await callback->await();
 
-    belt::com::com_ptr<IFabricGetNodeListResult> result;
+    winrt::com_ptr<IFabricGetNodeListResult> result;
     hr = client->EndGetNodeList(ctx.get(), result.put());
 
     BOOST_REQUIRE_EQUAL(hr, S_OK);
@@ -101,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_callback,
 
 BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
                      *boost::unit_test_framework::disabled()) {
-  belt::com::com_ptr<IFabricQueryClient> client;
+  winrt::com_ptr<IFabricQueryClient> client;
 
   HRESULT hr =
       ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
@@ -116,7 +114,7 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
 
   auto f = [&]() -> net::awaitable<void> {
     FABRIC_NODE_QUERY_DESCRIPTION node = {};
-    belt::com::com_ptr<IFabricGetNodeListResult> result;
+    winrt::com_ptr<IFabricGetNodeListResult> result;
     HRESULT lhr = co_await fc.GetNodeListExample(&node, result.put());
     BOOST_REQUIRE_EQUAL(lhr, S_OK);
     BOOST_REQUIRE_NE(result->get_NodeList(), nullptr);
@@ -127,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
   auto f2 = [&]() -> net::awaitable<void> {
     HRESULT lhr = S_OK;
     FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION query = {};
-    belt::com::com_ptr<IFabricGetApplicationTypeListResult> result;
+    winrt::com_ptr<IFabricGetApplicationTypeListResult> result;
     lhr = co_await fc.GetApplicationTypeList(&query, result.put());
     BOOST_REQUIRE_EQUAL(lhr, S_OK);
     BOOST_REQUIRE_NE(result->get_ApplicationTypeList(), nullptr);
@@ -135,7 +133,7 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
 
   net::co_spawn(io_context, f2, net::detached);
 
-  belt::com::com_ptr<IFabricHealthClient> healthClient;
+  winrt::com_ptr<IFabricHealthClient> healthClient;
 
   hr = ::FabricCreateLocalClient(IID_IFabricHealthClient,
                                  (void **)healthClient.put());
@@ -146,7 +144,7 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
   auto fhealth = [&]() -> net::awaitable<void> {
     HRESULT lhr = S_OK;
     FABRIC_CLUSTER_HEALTH_POLICY query = {};
-    belt::com::com_ptr<IFabricClusterHealthResult> result;
+    winrt::com_ptr<IFabricClusterHealthResult> result;
     lhr = co_await hc.GetClusterHealth(&query, result.put());
     BOOST_REQUIRE_EQUAL(lhr, S_OK);
     BOOST_REQUIRE_NE(result->get_ClusterHealth(), nullptr);
@@ -158,14 +156,14 @@ BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
     std::wstring nodeName = L"_Node_0"; // This is the name in default cluster
     FABRIC_CLUSTER_HEALTH_POLICY query = {};
     {
-      belt::com::com_ptr<IFabricNodeHealthResult> result;
+      winrt::com_ptr<IFabricNodeHealthResult> result;
       lhr = co_await hc.GetNodeHealth(nodeName.c_str(), &query, result.put());
       BOOST_REQUIRE_EQUAL(lhr, S_OK);
       BOOST_REQUIRE_NE(result->get_NodeHealth(), nullptr);
     }
     // get a unknown node and check error
     {
-      belt::com::com_ptr<IFabricNodeHealthResult> result;
+      winrt::com_ptr<IFabricNodeHealthResult> result;
       lhr = co_await hc.GetNodeHealth(L"BadNodeName", &query, result.put());
       BOOST_CHECK_MESSAGE(lhr == FABRIC_E_HEALTH_ENTITY_NOT_FOUND,
                           "not found: " + sf::get_fabric_error_str(lhr));
@@ -190,11 +188,12 @@ BOOST_AUTO_TEST_SUITE_END()
 
 #include "servicefabric/string_result.hpp"
 #include "servicefabric/waitable_callback.hpp"
+#include <winrt/base.h>
 
 #include <any>
 #include <latch>
 
-class myctx : public belt::com::object<myctx, IFabricAsyncOperationContext> {
+class myctx : public winrt::implements<myctx, IFabricAsyncOperationContext> {
 public:
   myctx(){};
   void SetAny(std::any &&a) { a_ = std::move(a); }
@@ -221,7 +220,7 @@ private:
 
 struct ctxpayload {
   HRESULT hr;
-  belt::com::com_ptr<IFabricStringResult> addr;
+  winrt::com_ptr<IFabricStringResult> addr;
 };
 
 class appInstanceImpl {
@@ -233,8 +232,7 @@ public:
   Open(IFabricStatelessServicePartition *partition,
        IFabricStringResult **serviceAddress) {
     UNREFERENCED_PARAMETER(partition);
-    *serviceAddress =
-        sf::string_result::create_instance(L"myaddress").to_ptr().detach();
+    *serviceAddress = winrt::make<sf::string_result>(L"myaddress").detach();
     co_return S_OK;
   }
   boost::asio::awaitable<HRESULT> Close() { co_return S_OK; }
@@ -256,7 +254,7 @@ private:
 
 // wrapped coro api.
 class appInstance
-    : public belt::com::object<appInstance, IFabricStatelessServiceInstance> {
+    : public winrt::implements<appInstance, IFabricStatelessServiceInstance> {
 public:
   appInstance(net::io_context &io_context)
       : io_context_(io_context), impl_(io_context) {}
@@ -266,14 +264,14 @@ public:
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-        myctx::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationCallback> cb(callback);
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx = winrt::make<myctx>();
+    winrt::com_ptr<IFabricAsyncOperationCallback> cb;
+    cb.copy_from(callback);
 
     auto f2 =
-        [this](belt::com::com_ptr<IFabricStatelessServicePartition> fpartition,
-               belt::com::com_ptr<IFabricAsyncOperationCallback> fcallback,
-               belt::com::com_ptr<IFabricAsyncOperationContext> fctx)
+        [this](winrt::com_ptr<IFabricStatelessServicePartition> fpartition,
+               winrt::com_ptr<IFabricAsyncOperationCallback> fcallback,
+               winrt::com_ptr<IFabricAsyncOperationContext> fctx)
         -> net::awaitable<void> {
       // add the result info in ctx so that end operation can access it.
       auto cctx = dynamic_cast<myctx *>(fctx.get());
@@ -292,7 +290,10 @@ public:
       fcallback->Invoke(cctx);
     };
 
-    net::co_spawn(io_context_, std::bind(f2, partition, cb, ctx),
+    winrt::com_ptr<IFabricStatelessServicePartition> fpartition;
+    fpartition.copy_from(partition);
+
+    net::co_spawn(io_context_, std::bind(f2, fpartition, cb, ctx),
                   net::detached);
 
     *context = ctx.detach();
@@ -347,9 +348,9 @@ public:
       std::string data,
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) {
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-        myctx::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationCallback> cb(callback);
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx = winrt::make<myctx>();
+    winrt::com_ptr<IFabricAsyncOperationCallback> cb;
+    cb.copy_from(callback);
 
     // copy to output
     ctx.get()->AddRef();
@@ -391,8 +392,8 @@ BOOST_AUTO_TEST_SUITE(test_fabric_asio2)
 BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
   net::io_context ioc;
 
-  belt::com::com_ptr<IFabricStatelessServiceInstance> svc =
-      appInstance::create_instance(ioc).to_ptr();
+  winrt::com_ptr<IFabricStatelessServiceInstance> svc =
+      winrt::make<appInstance>(ioc);
 
   // ioc must run after the job is posted to it,
   // otherwise ioc will see no jobs and finish run immediately.
@@ -401,10 +402,10 @@ BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
   // use waitable ctx
   auto f = [&]() {
     // test coro backend api.
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
     HRESULT hr = svc->BeginOpen(nullptr, // partition
                                 callback.get(), ctx.put());
@@ -412,7 +413,7 @@ BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
     lch.count_down();
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
-    belt::com::com_ptr<IFabricStringResult> addr;
+    winrt::com_ptr<IFabricStringResult> addr;
     hr = svc->EndOpen(ctx.get(), addr.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     BOOST_REQUIRE(std::wstring(addr->get_String()) ==
@@ -423,9 +424,9 @@ BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
   auto f2 = [&]() {
     // test callback backend api
     appInstance2 app2(ioc);
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
     HRESULT hr = app2.BeginProcessMessage("hello", callback.get(), ctx.put());
     lch2.count_down();

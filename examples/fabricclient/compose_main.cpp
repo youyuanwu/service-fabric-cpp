@@ -14,8 +14,6 @@
 #include <servicefabric/asio_callback.hpp>
 #include <servicefabric/compose.hpp>
 
-#include <moderncom/interfaces.h>
-
 #include <thread>
 
 namespace sf = servicefabric;
@@ -23,7 +21,7 @@ namespace net = boost::asio;
 
 int main() {
 
-  belt::com::com_ptr<IFabricQueryClient> client;
+  winrt::com_ptr<IFabricQueryClient> client;
 
   std::wstring conn = L"hello";
   HRESULT hr =

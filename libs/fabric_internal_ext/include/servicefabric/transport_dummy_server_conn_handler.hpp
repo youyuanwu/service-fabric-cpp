@@ -7,12 +7,12 @@
 #pragma once
 
 #include <fabrictransport_.h>
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace servicefabric {
 
 class transport_dummy_server_conn_handler
-    : public belt::com::object<transport_dummy_server_conn_handler,
+    : public winrt::implements<transport_dummy_server_conn_handler,
                                IFabricTransportConnectionHandler> {
 public:
   HRESULT STDMETHODCALLTYPE BeginProcessConnect(

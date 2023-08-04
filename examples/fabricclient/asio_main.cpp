@@ -11,14 +11,12 @@
 #include <servicefabric/asio_callback.hpp>
 #include <servicefabric/fabric_error.hpp>
 
-#include <moderncom/interfaces.h>
-
 namespace sf = servicefabric;
 namespace net = boost::asio;
 
 int main() {
 
-  belt::com::com_ptr<IFabricQueryClient> client;
+  winrt::com_ptr<IFabricQueryClient> client;
 
   HRESULT hr =
       ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
@@ -35,7 +33,7 @@ int main() {
   net::io_context io_context;
 
   auto lamda_callback = [client](IFabricAsyncOperationContext *ctx) {
-    belt::com::com_ptr<IFabricGetNodeListResult> result;
+    winrt::com_ptr<IFabricGetNodeListResult> result;
     HRESULT hr = client->EndGetNodeList(ctx, result.put());
     if (hr != NO_ERROR) {
       BOOST_LOG_TRIVIAL(debug) << "EndGetNodeList failed: " << hr << " "
@@ -48,12 +46,10 @@ int main() {
     }
   };
 
-  belt::com::com_ptr<IFabricAsyncOperationCallback> callback =
-      sf::AsioCallback::create_instance(lamda_callback,
-                                        io_context.get_executor())
-          .to_ptr();
+  winrt::com_ptr<IFabricAsyncOperationCallback> callback =
+      winrt::make<sf::AsioCallback>(lamda_callback, io_context.get_executor());
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
   FABRIC_NODE_QUERY_DESCRIPTION node = {};
   hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
   if (hr != NO_ERROR) {

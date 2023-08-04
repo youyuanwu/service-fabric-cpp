@@ -6,7 +6,6 @@
 
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
-#include <moderncom/interfaces.h>
 
 #include <boost/asio.hpp>
 #include <boost/log/trivial.hpp>
@@ -35,8 +34,8 @@ void timer_loop(net::deadline_timer *timer, const boost::system::error_code &) {
 HRESULT sf_main() {
   BOOST_LOG_TRIVIAL(debug) << "App start.";
 
-  belt::com::com_ptr<IFabricRuntime> fabric_runtime;
-  belt::com::com_ptr<IFabricCodePackageActivationContext> activation_context;
+  winrt::com_ptr<IFabricRuntime> fabric_runtime;
+  winrt::com_ptr<IFabricCodePackageActivationContext> activation_context;
 
   HRESULT hr =
       ::FabricCreateRuntime(IID_IFabricRuntime, (void **)fabric_runtime.put());
@@ -64,7 +63,7 @@ HRESULT sf_main() {
   std::shared_ptr<resolver> resolver_ptr =
       std::make_shared<sf_resolver>(activation_context);
 
-  belt::com::com_ptr<IFabricStatefulServiceFactory> service_factory =
+  winrt::com_ptr<IFabricStatefulServiceFactory> service_factory =
       service_factory::create_instance(resolver_ptr, hostname).to_ptr();
   hr = fabric_runtime->RegisterStatefulServiceFactory(L"KvStoreService",
                                                       service_factory.detach());
@@ -79,8 +78,8 @@ HRESULT sf_main() {
 // main logic when running outside sf
 // TODO the open replica seems to complicated to mock. This is not working yet.
 HRESULT
-local_main(belt::com::com_ptr<IFabricStatefulServiceFactory> &service_factory,
-           belt::com::com_ptr<IFabricStatefulServiceReplica> &replica) {
+local_main(winrt::com_ptr<IFabricStatefulServiceFactory> &service_factory,
+           winrt::com_ptr<IFabricStatefulServiceReplica> &replica) {
   std::shared_ptr<resolver> resolver_ptr = std::make_shared<dummy_resolver>();
   service_factory =
       service_factory::create_instance(resolver_ptr, L"localhost").to_ptr();
@@ -127,8 +126,8 @@ int main(int argc, char *argv[]) {
   net::io_context io_ctx;
 
   // local use
-  belt::com::com_ptr<IFabricStatefulServiceFactory> service_factory;
-  belt::com::com_ptr<IFabricStatefulServiceReplica> replica;
+  winrt::com_ptr<IFabricStatefulServiceFactory> service_factory;
+  winrt::com_ptr<IFabricStatefulServiceReplica> replica;
   HRESULT hr = S_OK;
   if (options.local) {
     hr = local_main(service_factory, replica);

@@ -7,13 +7,13 @@
 #pragma once
 
 #include "fabricservicecommunication_.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 #include "message.hpp"
 
 // for server handling requests
 class request_handler
-    : public belt::com::object<request_handler,
+    : public winrt::implements<request_handler,
                                IFabricCommunicationMessageHandler> {
 public:
   HRESULT STDMETHODCALLTYPE BeginProcessRequest(
@@ -30,8 +30,8 @@ public:
         << "request_handler::BeginProcessRequest: body "
         << std::string(body->Buffer, body->Buffer + body->BufferSize);
 #endif
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-        sf::async_context::create_instance(callback).to_ptr();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+        winrt::make<sf::async_context>(callback);
     *context = ctx.detach();
     return S_OK;
   }
@@ -43,8 +43,8 @@ public:
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "request_handler::EndProcessRequest";
 #endif
-    belt::com::com_ptr<IFabricServiceCommunicationMessage> msg1 =
-        message::create_instance("mybodyreply", "myheaderreply").to_ptr();
+    winrt::com_ptr<IFabricServiceCommunicationMessage> msg1 =
+        winrt::make<message>("mybodyreply", "myheaderreply");
     *reply = msg1.detach();
     return S_OK;
   }

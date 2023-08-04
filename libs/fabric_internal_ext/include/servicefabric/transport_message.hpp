@@ -8,13 +8,12 @@
 
 #include "FabricCommon.h"
 #include "fabrictransport_.h"
-// #include "FabricRuntime.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace servicefabric {
 
 class transport_message
-    : public belt::com::object<transport_message, IFabricTransportMessage> {
+    : public winrt::implements<transport_message, IFabricTransportMessage> {
 public:
   transport_message(std::string body, std::string headers);
 

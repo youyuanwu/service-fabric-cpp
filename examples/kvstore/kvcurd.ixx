@@ -8,7 +8,6 @@ module;
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
 #include <boost/log/trivial.hpp>
-#include <moderncom/interfaces.h>
 
 #include <servicefabric/waitable_callback.hpp>
 
@@ -17,10 +16,10 @@ export module kvcurd;
 namespace sf = servicefabric;
 
 // caller need to rollback if failed
-HRESULT commit_helper(belt::com::ref<IFabricTransaction> tx) {
-  belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+HRESULT commit_helper(winrt::com_ptr<IFabricTransaction> &tx) {
+  winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
       sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
   HRESULT hr;
   hr = tx->BeginCommit(1000, callback.get(), ctx.put());
@@ -40,11 +39,11 @@ HRESULT commit_helper(belt::com::ref<IFabricTransaction> tx) {
 
 export class curd {
 public:
-  curd(belt::com::ref<IFabricKeyValueStoreReplica2> store) : store_(store) {}
+  curd(winrt::com_ptr<IFabricKeyValueStoreReplica2> store) : store_(store) {}
 
   HRESULT add(std::wstring key, std::string val) {
     HRESULT hr;
-    belt::com::com_ptr<IFabricTransaction> tx;
+    winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
@@ -78,7 +77,7 @@ public:
 
   HRESULT get(std::wstring key, std::string &val) {
     HRESULT hr;
-    belt::com::com_ptr<IFabricTransaction> tx;
+    winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
@@ -112,7 +111,7 @@ public:
 
   HRESULT put(std::wstring key, std::string val) {
     HRESULT hr;
-    belt::com::com_ptr<IFabricTransaction> tx;
+    winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
@@ -150,7 +149,7 @@ public:
 
   HRESULT remove(std::wstring key) {
     HRESULT hr;
-    belt::com::com_ptr<IFabricTransaction> tx;
+    winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
@@ -188,7 +187,7 @@ public:
 
 private:
   // helper functions do not end transaction
-  HRESULT contains_key(belt::com::ref<IFabricTransaction> tx,
+  HRESULT contains_key(winrt::com_ptr<IFabricTransaction> &tx,
                        const std::wstring &key, bool &ret) {
     HRESULT hr;
     BOOLEAN b;
@@ -201,11 +200,11 @@ private:
     return S_OK;
   }
 
-  HRESULT get_helper(belt::com::ref<IFabricTransaction> tx,
+  HRESULT get_helper(winrt::com_ptr<IFabricTransaction> &tx,
                      const std::wstring &key, std::string &val,
                      FABRIC_SEQUENCE_NUMBER &num) {
     HRESULT hr;
-    belt::com::com_ptr<IFabricKeyValueStoreItemResult> item;
+    winrt::com_ptr<IFabricKeyValueStoreItemResult> item;
     hr = store_->Get(tx.get(), key.c_str(), item.put());
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "cannot Get: " << hr;
@@ -219,7 +218,7 @@ private:
     return S_OK;
   }
 
-  HRESULT put_helper(belt::com::ref<IFabricTransaction> tx,
+  HRESULT put_helper(winrt::com_ptr<IFabricTransaction> &tx,
                      const std::wstring &key, const std::string &val,
                      FABRIC_SEQUENCE_NUMBER num) {
     HRESULT hr;
@@ -232,7 +231,7 @@ private:
     return S_OK;
   }
 
-  HRESULT remove_helper(belt::com::ref<IFabricTransaction> tx,
+  HRESULT remove_helper(winrt::com_ptr<IFabricTransaction> &tx,
                         const std::wstring &key, FABRIC_SEQUENCE_NUMBER num) {
     HRESULT hr;
     hr = store_->Remove(tx.get(), key.c_str(), num);
@@ -243,5 +242,5 @@ private:
     return S_OK;
   }
 
-  belt::com::ref<IFabricKeyValueStoreReplica2> store_;
+  winrt::com_ptr<IFabricKeyValueStoreReplica2> store_;
 };

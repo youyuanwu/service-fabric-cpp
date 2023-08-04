@@ -17,7 +17,7 @@ template <typename Executor, typename Client, typename BeginFunc,
           typename EndFunc>
 class compose_op {
 public:
-  compose_op(Executor ex, belt::com::com_ptr<Client> client, BeginFunc bf,
+  compose_op(Executor ex, winrt::com_ptr<Client> client, BeginFunc bf,
              EndFunc ef)
       : ex_(ex), client_(client), bf_(bf), ef_(ef), callback_(), ctx_() {}
 
@@ -34,7 +34,7 @@ public:
     // construct callback
     auto lamda_callback = [this, token](IFabricAsyncOperationContext *ctx) {
       boost::system::error_code ec;
-      belt::com::com_ptr<Result> result;
+      winrt::com_ptr<Result> result;
       // invoke end func
       HRESULT hr = (client_.get()->*ef_)(ctx, result.put());
       if (hr != NO_ERROR) {
@@ -45,7 +45,7 @@ public:
       token(ec, result.get());
     };
 
-    callback_ = AsioCallback::create_instance(lamda_callback, ex_).to_ptr();
+    callback_ = winrt::make<AsioCallback>(lamda_callback, ex_);
     // invoke begin func
     HRESULT hr = (client_.get()->*bf_)(q, 1000, callback_.get(), ctx_.put());
     if (hr != NO_ERROR) {
@@ -59,14 +59,14 @@ public:
 
 private:
   // operation signature types
-  belt::com::com_ptr<Client> client_;
+  winrt::com_ptr<Client> client_;
   BeginFunc bf_;
   EndFunc ef_;
   Executor ex_;
 
   // self owned internal
-  belt::com::com_ptr<IFabricAsyncOperationCallback> callback_;
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx_;
+  winrt::com_ptr<IFabricAsyncOperationCallback> callback_;
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx_;
 };
 
 } // namespace servicefabric

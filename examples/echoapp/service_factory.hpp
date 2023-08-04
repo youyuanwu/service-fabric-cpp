@@ -8,10 +8,10 @@
 
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 class service_factory
-    : public belt::com::object<service_factory,
+    : public winrt::implements<service_factory,
                                IFabricStatelessServiceFactory> {
 
 public:

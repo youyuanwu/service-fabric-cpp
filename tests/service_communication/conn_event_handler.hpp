@@ -10,13 +10,13 @@
 
 #include "fabricservicecommunication_.h"
 #include "servicefabric/async_context.hpp"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace sf = servicefabric;
 
 // for client
 class conn_event_handler
-    : public belt::com::object<conn_event_handler,
+    : public winrt::implements<conn_event_handler,
                                IFabricServiceConnectionEventHandler> {
 public:
   HRESULT STDMETHODCALLTYPE OnConnected(

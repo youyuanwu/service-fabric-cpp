@@ -22,8 +22,8 @@ transport_dummy_server_conn_handler::BeginProcessConnect(
   BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessConnect";
 #endif
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-      async_context::create_instance(callback).to_ptr();
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+      winrt::make<async_context>(callback);
 
   *context = ctx.detach();
 
@@ -51,8 +51,8 @@ transport_dummy_server_conn_handler::BeginProcessDisconnect(
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessDisconnect";
 #endif
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-      async_context::create_instance(callback).to_ptr();
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+      winrt::make<async_context>(callback);
   *context = ctx.detach();
   return S_OK;
 }

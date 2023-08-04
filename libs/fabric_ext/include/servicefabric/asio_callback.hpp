@@ -13,7 +13,7 @@
 // #include <boost/asio/awaitable.hpp>
 #include <boost/asio/use_awaitable.hpp>
 
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 #include <functional>
 
@@ -55,7 +55,7 @@ private:
 } // namespace details
 
 class AsioCallback
-    : public belt::com::object<AsioCallback, IFabricAsyncOperationCallback> {
+    : public winrt::implements<AsioCallback, IFabricAsyncOperationCallback> {
 public:
   template <typename Executor>
   AsioCallback(std::function<void(IFabricAsyncOperationContext *)> token,
@@ -79,7 +79,7 @@ public:
 };
 
 class AsioAwaitableCallback
-    : public belt::com::object<AsioAwaitableCallback, IAwaitableCallback> {
+    : public winrt::implements<AsioAwaitableCallback, IAwaitableCallback> {
 public:
   template <typename Executor> AsioAwaitableCallback(Executor ex) : oh_(ex) {
     // create a event and assgn to handle

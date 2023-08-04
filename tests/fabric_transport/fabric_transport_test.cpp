@@ -10,8 +10,6 @@
 
 #include "fabrictransport_.h"
 
-#include <moderncom/interfaces.h>
-
 #include "request_handler.hpp"
 
 #include "servicefabric/async_context.hpp"
@@ -45,13 +43,13 @@ BOOST_AUTO_TEST_CASE(test_1) {
   addr.Path = L"/";
   addr.Port = 12345;
 
-  belt::com::com_ptr<IFabricTransportMessageHandler> req_handler =
-      request_handler::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricTransportConnectionHandler> conn_handler =
-      sf::transport_dummy_server_conn_handler::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricTransportMessageDisposer> msg_disposer =
-      sf::transport_dummy_msg_disposer::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricTransportListener> listener;
+  winrt::com_ptr<IFabricTransportMessageHandler> req_handler =
+      winrt::make<request_handler>();
+  winrt::com_ptr<IFabricTransportConnectionHandler> conn_handler =
+      winrt::make<sf::transport_dummy_server_conn_handler>();
+  winrt::com_ptr<IFabricTransportMessageDisposer> msg_disposer =
+      winrt::make<sf::transport_dummy_msg_disposer>();
+  winrt::com_ptr<IFabricTransportListener> listener;
 
   // create listener
   HRESULT hr = CreateFabricTransportListener(
@@ -59,12 +57,12 @@ BOOST_AUTO_TEST_CASE(test_1) {
       conn_handler.get(), msg_disposer.get(), listener.put());
 
   BOOST_REQUIRE_EQUAL(S_OK, hr);
-  belt::com::com_ptr<IFabricStringResult> addr_str;
+  winrt::com_ptr<IFabricStringResult> addr_str;
   {
     // open listener
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener->BeginOpen(callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
@@ -76,16 +74,14 @@ BOOST_AUTO_TEST_CASE(test_1) {
                            << addr_str->get_String();
 #endif
 
-  belt::com::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
-      sf::transport_dummy_client_notification_handler::create_instance()
-          .to_ptr();
+  winrt::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
+      winrt::make<sf::transport_dummy_client_notification_handler>();
 
-  belt::com::com_ptr<IFabricTransportClientEventHandler> client_event_h =
-      sf::transport_dummy_client_conn_handler::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
-      sf::transport_dummy_msg_disposer::create_instance().to_ptr();
-  ;
-  belt::com::com_ptr<IFabricTransportClient> client;
+  winrt::com_ptr<IFabricTransportClientEventHandler> client_event_h =
+      winrt::make<sf::transport_dummy_client_conn_handler>();
+  winrt::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
+      winrt::make<sf::transport_dummy_msg_disposer>();
+  winrt::com_ptr<IFabricTransportClient> client;
 
   // open client
   hr = CreateFabricTransportClient(
@@ -100,9 +96,9 @@ BOOST_AUTO_TEST_CASE(test_1) {
 
   // open client
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = client->BeginOpen(1000, callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
@@ -112,15 +108,15 @@ BOOST_AUTO_TEST_CASE(test_1) {
 
   // make request
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
-    belt::com::com_ptr<IFabricTransportMessage> msg =
-        sf::transport_message::create_instance("mybody", "myheader").to_ptr();
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricTransportMessage> msg =
+        winrt::make<sf::transport_message>("mybody", "myheader");
     hr = client->BeginRequest(msg.get(), 1000, callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
-    belt::com::com_ptr<IFabricTransportMessage> reply;
+    winrt::com_ptr<IFabricTransportMessage> reply;
     hr = client->EndRequest(ctx.get(), reply.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
 
@@ -134,9 +130,9 @@ BOOST_AUTO_TEST_CASE(test_1) {
 
   // close listener
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener->BeginClose(callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();

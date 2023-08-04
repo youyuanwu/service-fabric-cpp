@@ -22,10 +22,10 @@ boost::asio::awaitable<HRESULT> async_operation(IClient *client, BeginFunc bf,
   auto executor = co_await net::this_coro::executor;
   HRESULT hr = S_OK;
   // this is a obj holder
-  belt::com::com_ptr<sf::IAwaitableCallback> callback =
-      sf::AsioAwaitableCallback::create_instance(executor).to_ptr();
+  winrt::com_ptr<sf::IAwaitableCallback> callback =
+      winrt::make<sf::AsioAwaitableCallback>(executor);
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
   // FABRIC_NODE_QUERY_DESCRIPTION node = {};
   hr = (*client.*bf)(params..., 1000, callback.get(), ctx.put());
   if (hr != S_OK) {
@@ -40,7 +40,7 @@ boost::asio::awaitable<HRESULT> async_operation(IClient *client, BeginFunc bf,
 
 class AwaitableFabricQueryClient {
 public:
-  AwaitableFabricQueryClient(belt::com::com_ptr<IFabricQueryClient> client)
+  AwaitableFabricQueryClient(winrt::com_ptr<IFabricQueryClient> client)
       : client_(client) {}
 
   // async api
@@ -58,12 +58,12 @@ public:
       IFabricGetApplicationTypeListResult **ret);
 
 private:
-  belt::com::com_ptr<IFabricQueryClient> client_;
+  winrt::com_ptr<IFabricQueryClient> client_;
 };
 
 class AwaitableFabricHealthClient {
 public:
-  AwaitableFabricHealthClient(belt::com::com_ptr<IFabricHealthClient> client)
+  AwaitableFabricHealthClient(winrt::com_ptr<IFabricHealthClient> client)
       : client_(client) {}
 
   boost::asio::awaitable<HRESULT>
@@ -76,7 +76,7 @@ public:
                 IFabricNodeHealthResult **ret);
 
 private:
-  belt::com::com_ptr<IFabricHealthClient> client_;
+  winrt::com_ptr<IFabricHealthClient> client_;
 };
 
 } // namespace servicefabric

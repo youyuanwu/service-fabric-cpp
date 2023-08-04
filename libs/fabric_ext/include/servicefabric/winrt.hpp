@@ -8,8 +8,6 @@
 
 #include "FabricCommon.h"
 
-#include <moderncom/interfaces.h>
-
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/base.h>
 namespace servicefabric {
@@ -23,7 +21,7 @@ public:
 };
 
 class WinRTAwaitableCallback
-    : public belt::com::object<WinRTAwaitableCallback,
+    : public winrt::implements<WinRTAwaitableCallback,
                                IWinRTAwaitableCallback> {
 public:
   WinRTAwaitableCallback()

@@ -14,8 +14,6 @@
 
 #include "fabricservicecommunication_.h"
 
-#include <moderncom/interfaces.h>
-
 #include "servicefabric/async_context.hpp"
 #include "servicefabric/fabric_error.hpp"
 #include "servicefabric/waitable_callback.hpp"
@@ -62,24 +60,24 @@ BOOST_AUTO_TEST_CASE(test_construct) {
   addr.Path = L"/";
   addr.Port = 12345;
 
-  belt::com::com_ptr<IFabricCommunicationMessageHandler> req_handler =
-      request_handler::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricServiceConnectionHandler> conn_handler =
-      conn_handler::create_instance().to_ptr();
+  winrt::com_ptr<IFabricCommunicationMessageHandler> req_handler =
+      winrt::make<request_handler>();
+  winrt::com_ptr<IFabricServiceConnectionHandler> conn_handler_ptr =
+      winrt::make<conn_handler>();
 
-  belt::com::com_ptr<IFabricServiceCommunicationListener> listener;
+  winrt::com_ptr<IFabricServiceCommunicationListener> listener;
 
   HRESULT hr = CreateServiceCommunicationListener(
       IID_IFabricServiceCommunicationListener, &settings, &addr,
-      req_handler.get(), conn_handler.get(), listener.put());
+      req_handler.get(), conn_handler_ptr.get(), listener.put());
 
   BOOST_CHECK_MESSAGE(hr == S_OK, sf::get_fabric_error_str(hr));
   BOOST_REQUIRE_EQUAL(hr, S_OK);
-  belt::com::com_ptr<IFabricStringResult> addr_str;
+  winrt::com_ptr<IFabricStringResult> addr_str;
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener->BeginOpen(callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
@@ -94,33 +92,33 @@ BOOST_AUTO_TEST_CASE(test_construct) {
 
   // This is server to client notification?
   // not seeing this being invoked. Some internal impl pass nullptr?
-  belt::com::com_ptr<IFabricCommunicationMessageHandler> notification_handler =
-      notification_handler::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricServiceConnectionEventHandler> conn_event_handler =
-      conn_event_handler::create_instance().to_ptr();
+  winrt::com_ptr<IFabricCommunicationMessageHandler> notification_handler_ptr =
+      winrt::make<notification_handler>();
+  winrt::com_ptr<IFabricServiceConnectionEventHandler> conn_event_handler_ptr =
+      winrt::make<conn_event_handler>();
 
-  belt::com::com_ptr<IFabricServiceCommunicationClient> client;
+  winrt::com_ptr<IFabricServiceCommunicationClient> client;
   hr = CreateServiceCommunicationClient(
       /* [in] */ IID_IFabricServiceCommunicationClient,
       /* [in] */ &settings,
       /* [in] */ L"localhost:12345+/",
-      /* [in] */ notification_handler.get(),
-      /* [in] */ conn_event_handler.get(), client.put());
+      /* [in] */ notification_handler_ptr.get(),
+      /* [in] */ conn_event_handler_ptr.get(), client.put());
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 
   // let server be up
   Sleep(3000);
 
   { // make request
-    belt::com::com_ptr<IFabricServiceCommunicationMessage> msg1 =
-        message::create_instance("mybody", "myheader").to_ptr();
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricServiceCommunicationMessage> msg1 =
+        winrt::make<message>("mybody", "myheader");
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = client->BeginRequest(msg1.get(), 1000, callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
-    belt::com::com_ptr<IFabricServiceCommunicationMessage> reply1;
+    winrt::com_ptr<IFabricServiceCommunicationMessage> reply1;
     hr = client->EndRequest(ctx.get(), reply1.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
 
@@ -135,9 +133,9 @@ BOOST_AUTO_TEST_CASE(test_construct) {
 
   // cleanup server
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener->BeginClose(callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     hr = listener->EndClose(ctx.get());

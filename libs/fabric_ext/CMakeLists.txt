@@ -10,7 +10,6 @@ target_include_directories(fabric_ext
 )
 target_link_libraries(fabric_ext
   INTERFACE Boost::disable_autolinking Boost::headers
-  PUBLIC moderncom
   PUBLIC fabric_sdk
   PUBLIC    Boost::log
 )

@@ -10,7 +10,8 @@
 namespace servicefabric {
 
 async_context::async_context(IFabricAsyncOperationCallback *callback)
-    : callback_(callback) {
+    : callback_() {
+  callback_.copy_from(callback);
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "async_context::async_context";
 #endif

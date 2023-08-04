@@ -35,8 +35,8 @@ HRESULT STDMETHODCALLTYPE app_instance::BeginOpen(
     server_threads_.emplace_back([this] { io_context_.run(); });
   }
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-      sf::async_context::create_instance(callback).to_ptr();
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+      winrt::make<sf::async_context>(callback);
 
   *context = ctx.detach();
   return S_OK;
@@ -53,8 +53,8 @@ HRESULT STDMETHODCALLTYPE app_instance::EndOpen(
 
   std::wstring addr_str = hostname_ + L":" + std::to_wstring(port_);
 
-  belt::com::com_ptr<IFabricStringResult> addr =
-      sf::string_result::create_instance(addr_str).to_ptr();
+  winrt::com_ptr<IFabricStringResult> addr =
+      winrt::make<sf::string_result>(addr_str);
   *serviceAddress = addr.detach();
 
   return S_OK;
@@ -76,8 +76,8 @@ HRESULT STDMETHODCALLTYPE app_instance::BeginClose(
     }
   }
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-      sf::async_context::create_instance(callback).to_ptr();
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+      winrt::make<sf::async_context>(callback);
 
   *context = ctx.detach();
 

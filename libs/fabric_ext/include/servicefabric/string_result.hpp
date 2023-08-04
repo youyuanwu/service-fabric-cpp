@@ -7,13 +7,12 @@
 #pragma once
 
 #include "FabricCommon.h"
-// #include "FabricRuntime.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace servicefabric {
 
 class string_result
-    : public belt::com::object<string_result, IFabricStringResult> {
+    : public winrt::implements<string_result, IFabricStringResult> {
 public:
   string_result(std::wstring str);
   LPCWSTR STDMETHODCALLTYPE get_String() override;

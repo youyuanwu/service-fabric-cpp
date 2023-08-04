@@ -8,7 +8,7 @@
 
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 #include "echo_server.hpp"
 
@@ -18,7 +18,7 @@
 #include <vector>
 
 class app_instance
-    : public belt::com::object<app_instance, IFabricStatelessServiceInstance> {
+    : public winrt::implements<app_instance, IFabricStatelessServiceInstance> {
 public:
   app_instance(ULONG port, std::wstring hostname);
 

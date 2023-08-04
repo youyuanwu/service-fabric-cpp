@@ -676,10 +676,9 @@ BOOST_AUTO_TEST_CASE(basic_com_test) {
   // make com wrapper
   winrt::com_ptr<IAComponent> ccA = winrt::make<ComAComponent>(impl);
 
-  belt::com::com_ptr<servicefabric::IFabricAsyncOperationWaitableCallback>
+  winrt::com_ptr<servicefabric::IFabricAsyncOperationWaitableCallback>
       callback =
-          servicefabric::FabricAsyncOperationWaitableCallback::create_instance()
-              .to_ptr();
+          winrt::make<servicefabric::FabricAsyncOperationWaitableCallback>();
   winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
   HRESULT hr = ccA->BeginFooA(callback.get(), ctx.put());

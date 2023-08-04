@@ -8,12 +8,12 @@
 
 #include "FabricCommon.h"
 #include "fabrictransport_.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace servicefabric {
 
 class transport_dummy_msg_disposer
-    : public belt::com::object<transport_dummy_msg_disposer,
+    : public winrt::implements<transport_dummy_msg_disposer,
                                IFabricTransportMessageDisposer> {
 public:
   void STDMETHODCALLTYPE Dispose(

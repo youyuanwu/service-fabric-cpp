@@ -18,7 +18,7 @@ Linux is not supported.
 * Install service fabric runtime. See [get-started](https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started)
 * Install Boost. Boost libs used: Boost asio, Boost log.
 * Install Visual Studio msvc tool chain.
-* CMake will also auto download dependencies `magic_enum` and `moderncom`.
+* CMake will also auto download dependencies `magic_enum`.
 
 ## Build
 ```

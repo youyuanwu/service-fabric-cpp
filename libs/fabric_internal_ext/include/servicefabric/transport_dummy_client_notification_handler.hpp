@@ -8,13 +8,13 @@
 
 #include "FabricCommon.h"
 #include "fabrictransport_.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace servicefabric {
 
 // server handle request
 class transport_dummy_client_notification_handler
-    : public belt::com::object<transport_dummy_client_notification_handler,
+    : public winrt::implements<transport_dummy_client_notification_handler,
                                IFabricTransportCallbackMessageHandler> {
 public:
   virtual HRESULT STDMETHODCALLTYPE HandleOneWay(

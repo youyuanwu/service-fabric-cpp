@@ -9,8 +9,7 @@
 
 #include <condition_variable>
 #include <mutex>
-
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace servicefabric {
 
@@ -22,7 +21,7 @@ public:
 };
 
 class FabricAsyncOperationWaitableCallback
-    : public belt::com::object<
+    : public winrt::implements<
           FabricAsyncOperationWaitableCallback,  // our class
           IFabricAsyncOperationWaitableCallback> // we implement
 {

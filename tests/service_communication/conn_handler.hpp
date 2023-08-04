@@ -8,12 +8,12 @@
 
 #include "fabricservicecommunication_.h"
 #include "servicefabric/async_context.hpp"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 namespace sf = servicefabric;
 
 class conn_handler
-    : public belt::com::object<conn_handler, IFabricServiceConnectionHandler> {
+    : public winrt::implements<conn_handler, IFabricServiceConnectionHandler> {
 public:
   HRESULT STDMETHODCALLTYPE BeginProcessConnect(
       /* [in] */ IFabricClientConnection *clientConnection,
@@ -26,8 +26,8 @@ public:
     BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessConnect";
 #endif
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-        sf::async_context::create_instance(callback).to_ptr();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+        winrt::make<sf::async_context>(callback);
 
     *context = ctx.detach();
 
@@ -53,8 +53,8 @@ public:
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessDisconnect";
 #endif
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-        sf::async_context::create_instance(callback).to_ptr();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+        winrt::make<sf::async_context>(callback);
     *context = ctx.detach();
     return S_OK;
   };

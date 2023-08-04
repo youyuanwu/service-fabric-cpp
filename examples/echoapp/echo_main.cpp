@@ -6,7 +6,6 @@
 
 #include <FabricRuntime.h>
 #include <boost/log/trivial.hpp>
-#include <moderncom/interfaces.h>
 #include <servicefabric/fabric_error.hpp>
 
 #include "loop_timer.hpp"
@@ -39,8 +38,8 @@ void wait_for_debugger(int argc, char *argv[]) {
 }
 
 HRESULT run_app(
-    belt::com::ref<IFabricRuntime> fabric_runtime,
-    belt::com::ref<IFabricCodePackageActivationContext> activation_context) {
+    winrt::com_ptr<IFabricRuntime> fabric_runtime,
+    winrt::com_ptr<IFabricCodePackageActivationContext> activation_context) {
 
   ULONG port = 0;
   HRESULT hr = sf::get_port(activation_context, L"ServiceEndpoint1", port);
@@ -53,13 +52,13 @@ HRESULT run_app(
     return hr;
   }
 
-  belt::com::com_ptr<IFabricStatelessServiceFactory> service_factory =
-      service_factory::create_instance(port, hostname).to_ptr();
+  winrt::com_ptr<IFabricStatelessServiceFactory> service_factory_ptr =
+      winrt::make<service_factory>(port, hostname);
 
   // give runtime onwership
   // Service type name must match from the service manifest
   return fabric_runtime->RegisterStatelessServiceFactory(
-      L"EchoAppService", service_factory.detach());
+      L"EchoAppService", service_factory_ptr.detach());
 }
 
 int main(int argc, char *argv[]) {
@@ -69,8 +68,8 @@ int main(int argc, char *argv[]) {
 
   BOOST_LOG_TRIVIAL(debug) << "App start.";
 
-  belt::com::com_ptr<IFabricRuntime> fabric_runtime;
-  belt::com::com_ptr<IFabricCodePackageActivationContext> activation_context;
+  winrt::com_ptr<IFabricRuntime> fabric_runtime;
+  winrt::com_ptr<IFabricCodePackageActivationContext> activation_context;
 
   HRESULT hr =
       ::FabricCreateRuntime(IID_IFabricRuntime, (void **)fabric_runtime.put());

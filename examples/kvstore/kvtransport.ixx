@@ -6,7 +6,7 @@
 
 module;
 #include "fabrictransport_.h"
-#include <moderncom/interfaces.h>
+#include <winrt/base.h>
 
 #include <boost/log/trivial.hpp>
 
@@ -28,7 +28,7 @@ namespace sf = servicefabric;
 // request handler
 // TODO: implement logic
 class request_handler
-    : public belt::com::object<request_handler,
+    : public winrt::implements<request_handler,
                                IFabricTransportMessageHandler> {
 public:
   HRESULT STDMETHODCALLTYPE BeginProcessRequest(
@@ -51,7 +51,7 @@ public:
         << " body: " << body;
 #endif
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         sf::async_context::create_instance(callback).to_ptr();
     *context = ctx.detach();
     return S_OK;
@@ -64,7 +64,7 @@ public:
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "request_handler::EndProcessRequest";
 #endif
-    belt::com::com_ptr<IFabricTransportMessage> msg1 =
+    winrt::com_ptr<IFabricTransportMessage> msg1 =
         sf::transport_message::create_instance("mybodyreply", "myheaderreply")
             .to_ptr();
     *reply = msg1.detach();
@@ -124,16 +124,16 @@ public:
     }
 
     // open listener
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
         sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener_->BeginOpen(callback.get(), ctx.put());
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "cannot BeginOpen: " << hr;
       return hr;
     }
     callback->Wait();
-    belt::com::com_ptr<IFabricStringResult> addr_str;
+    winrt::com_ptr<IFabricStringResult> addr_str;
     hr = listener_->EndOpen(ctx.get(), addr_str.put());
     if (hr != S_OK) {
       BOOST_LOG_TRIVIAL(error) << "cannot EndOpen: " << hr;
@@ -152,9 +152,9 @@ public:
     if (!this->is_listening_) {
       return S_OK;
     }
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
         sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     HRESULT hr;
     hr = listener_->BeginClose(callback.get(), ctx.put());
 
@@ -174,10 +174,10 @@ public:
   }
 
 private:
-  belt::com::com_ptr<IFabricTransportMessageHandler> req_handler_;
-  belt::com::com_ptr<IFabricTransportConnectionHandler> conn_handler_;
-  belt::com::com_ptr<IFabricTransportMessageDisposer> msg_disposer_;
-  belt::com::com_ptr<IFabricTransportListener> listener_;
+  winrt::com_ptr<IFabricTransportMessageHandler> req_handler_;
+  winrt::com_ptr<IFabricTransportConnectionHandler> conn_handler_;
+  winrt::com_ptr<IFabricTransportMessageDisposer> msg_disposer_;
+  winrt::com_ptr<IFabricTransportListener> listener_;
 
   std::wstring hostname_;
   ULONG port_;
@@ -187,15 +187,14 @@ private:
 
 export class kv_client {
 public:
-  kv_client(belt::com::com_ptr<IFabricTransportClient> client)
-      : client_(client) {}
+  kv_client(winrt::com_ptr<IFabricTransportClient> client) : client_(client) {}
 
-  HRESULT send(belt::com::ref<IFabricTransportMessage> const request,
-               belt::com::com_ptr<IFabricTransportMessage> &reply) {
+  HRESULT send(winrt::com_ptr<IFabricTransportMessage> const &request,
+               winrt::com_ptr<IFabricTransportMessage> &reply) {
     HRESULT hr = S_OK;
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
         sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = client_->BeginRequest(request.get(), 1000, callback.get(), ctx.put());
 
     if (hr != S_OK) {
@@ -212,5 +211,5 @@ public:
   }
 
 private:
-  belt::com::com_ptr<IFabricTransportClient> client_;
+  winrt::com_ptr<IFabricTransportClient> client_;
 };

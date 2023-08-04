@@ -20,10 +20,10 @@ boost::asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetNodeListExample(
   auto executor = co_await net::this_coro::executor;
   HRESULT hr = S_OK;
 
-  belt::com::com_ptr<sf::IAwaitableCallback> callback =
-      sf::AsioAwaitableCallback::create_instance(executor).to_ptr();
+  winrt::com_ptr<sf::IAwaitableCallback> callback =
+      winrt::make<sf::AsioAwaitableCallback>(executor);
 
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
   FABRIC_NODE_QUERY_DESCRIPTION node = {};
   hr = client_->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
   if (hr != S_OK) {

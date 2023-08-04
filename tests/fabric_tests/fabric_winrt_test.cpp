@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(test_winrt_waitable_callback,
                      *boost::unit_test_framework::disabled()) {
   winrt::init_apartment();
 
-  belt::com::com_ptr<IFabricQueryClient> client;
+  winrt::com_ptr<IFabricQueryClient> client;
 
   HRESULT hr =
       ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
@@ -33,10 +33,10 @@ BOOST_AUTO_TEST_CASE(test_winrt_waitable_callback,
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 
   auto f = [&]() -> winrt::Windows::Foundation::IAsyncAction {
-    belt::com::com_ptr<sf::IWinRTAwaitableCallback> callback =
-        sf::WinRTAwaitableCallback::create_instance().to_ptr();
+    winrt::com_ptr<sf::IWinRTAwaitableCallback> callback =
+        winrt::make<sf::WinRTAwaitableCallback>();
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     FABRIC_NODE_QUERY_DESCRIPTION node = {};
     HRESULT hr =
         client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_winrt_waitable_callback,
     // function
     co_await callback->await();
 
-    belt::com::com_ptr<IFabricGetNodeListResult> result;
+    winrt::com_ptr<IFabricGetNodeListResult> result;
     hr = client->EndGetNodeList(ctx.get(), result.put());
 
     if (hr != S_OK) {
