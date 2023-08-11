@@ -62,22 +62,29 @@ jobs:
     - name: run build
       run: cmake --build build --config ${{ matrix.BUILD_TYPE }}
 
-    # build requires c++23 so need ws-2022, but sf cluster does not start on ws-2022
+    # mysql bin has conflicting dlls with fabric than prevents fabric from starting
+    - name: Remove conflict dll paths
+      shell: powershell
+      run: |
+        get-command libprotobuf.dll
+        Remove-Item -Recurse -Force C:\mysql\bin
 
-    # - name: start sf cluster
-    #   run: Powershell.exe -File "C:\Program Files\Microsoft SDKs\Service Fabric\ClusterSetup\DevClusterSetup.ps1" -CreateOneNodeCluster
+    - name: start sf cluster
+      shell: powershell
+      run: |
+        & "C:\Program Files\Microsoft SDKs\Service Fabric\ClusterSetup\DevClusterSetup.ps1" -CreateOneNodeCluster
     
-    # - name: start connection
-    #   run: Powershell.exe -File .\scripts\check_cluster_online.ps1
+    - name: start connection
+      run: Powershell.exe -File .\scripts\check_cluster_online.ps1
     # # TODO: determine if stop cluster is needed
 
     # tests require cluster to be running are disabled
     - name: run test
       run: ctest -C ${{ matrix.BUILD_TYPE }} --test-dir build --verbose --repeat until-pass:3 --timeout 30
 
-    # - name: run example test
-    #   run: Powershell.exe -File .\tests\examples_script_test.ps1 -Mode ${{ matrix.BUILD_TYPE }}
+    - name: run example test
+      run: Powershell.exe -File .\tests\examples_script_test.ps1 -Mode ${{ matrix.BUILD_TYPE }}
 
-    # - name: run echo example app
-    #   run: Powershell.exe -File .\tests\echo_script_test.ps1
+    - name: run echo example app
+      run: Powershell.exe -File .\tests\echo_script_test.ps1
 

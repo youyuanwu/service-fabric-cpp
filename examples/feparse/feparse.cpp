@@ -8,25 +8,32 @@ namespace sf = servicefabric;
 namespace po = boost::program_options;
 
 int main(int argc, char **argv) {
-  HRESULT hr = {};
+  std::int64_t input = {};
 
-  po::options_description desc("Allowed options");
-  desc.add_options()("help", "produce help message")(
-      "hr", po::value(&hr)->default_value(S_OK), "error code value");
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);
+  try {
 
-  if (vm.count("help")) {
-    std::stringstream ss;
-    ss << std::endl;
-    desc.print(ss);
-    std::cerr << ss.str();
+    po::options_description desc("Allowed options");
+    desc.add_options()("help", "produce help message")(
+        "hr", po::value(&input)->default_value(S_OK), "error code value");
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+      std::stringstream ss;
+      ss << std::endl;
+      desc.print(ss);
+      std::cerr << ss.str();
+      return EXIT_FAILURE;
+    }
+
+    // example hr value: -2147017793;
+    HRESULT hr = static_cast<HRESULT>(input);
+    std::string str = sf::get_fabric_error_str(hr);
+    std::cout << "FabricError: " << str;
+  } catch (const std::exception &e) {
+    std::cerr << "Exception: " << e.what();
     return EXIT_FAILURE;
   }
-
-  // example hr value: -2147017793;
-  std::string str = sf::get_fabric_error_str(hr);
-  std::cout << "FabricError: " << str;
   return EXIT_SUCCESS;
 }
