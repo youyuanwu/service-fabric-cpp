@@ -1,0 +1,12 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "service-fabric-cpp",
+  "version": "0.0.1",
+  "dependencies": [
+    "boost-asio",
+    "boost-log",
+    "boost-test",
+    "boost-program-options",
+    "magic-enum"
+  ]
+}

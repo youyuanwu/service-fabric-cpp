@@ -1,14 +1,33 @@
-cmake_minimum_required(VERSION 3.14)
-
-project(service-fabric LANGUAGES C CXX)
-
-# hack
-set(Boost_NO_WARN_NEW_VERSIONS 1)
+cmake_minimum_required(VERSION 3.20)
 
 set(service_fabric_MAIN_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(service_fabric_MAIN_PROJECT ON)
 endif()
+
+if(service_fabric_MAIN_PROJECT)
+    # configure vcpkg
+    # no CmakePresets.json since it works not well with vscode yet.
+    if ("$ENV{VCPKG_ROOT}" STREQUAL "")
+    message(FATAL_ERROR "VCPKG_ROOT not found")
+    endif()
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    # these vars are not working
+    # set(VCPKG_TARGET_ARCHITECTURE "x64")
+    # set(VCPKG_CRT_LINKAGE "static")
+    # set(VCPKG_LIBRARY_LINKAGE "static")
+    set(VCPKG_TARGET_TRIPLET "x64-windows-static")
+    # Set MSVC runtime to MultiThreaded (/MT) static crt
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
+project(service-fabric LANGUAGES C CXX)
+
+message(STATUS "vcpkg installed dir: ${VCPKG_INSTALLED_DIR}")
+
+# hack
+set(Boost_NO_WARN_NEW_VERSIONS 1)
+set(Boost_USE_STATIC_RUNTIME OFF)
 
 option(service_fabric_BuildTests     "Build the unit tests when BUILD_TESTING is enabled." ${service_fabric_MAIN_PROJECT})
 option(service_fabric_BuildExamples  "Build examples"                                      ${service_fabric_MAIN_PROJECT})
