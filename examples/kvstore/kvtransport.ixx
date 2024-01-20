@@ -52,7 +52,7 @@ public:
 #endif
 
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
-        sf::async_context::create_instance(callback).to_ptr();
+        winrt::make<sf::async_context>(callback);
     *context = ctx.detach();
     return S_OK;
   }
@@ -65,8 +65,7 @@ public:
     BOOST_LOG_TRIVIAL(debug) << "request_handler::EndProcessRequest";
 #endif
     winrt::com_ptr<IFabricTransportMessage> msg1 =
-        sf::transport_message::create_instance("mybodyreply", "myheaderreply")
-            .to_ptr();
+        winrt::make<sf::transport_message>("mybodyreply", "myheaderreply");
     *reply = msg1.detach();
     return S_OK;
   }
@@ -86,11 +85,9 @@ public:
 export class kv_server {
 public:
   kv_server(std::wstring hostname, ULONG port)
-      : req_handler_(request_handler::create_instance().to_ptr()),
-        conn_handler_(sf::transport_dummy_server_conn_handler::create_instance()
-                          .to_ptr()),
-        msg_disposer_(
-            sf::transport_dummy_msg_disposer::create_instance().to_ptr()),
+      : req_handler_(winrt::make<request_handler>()),
+        conn_handler_(winrt::make<sf::transport_dummy_server_conn_handler>()),
+        msg_disposer_(winrt::make<sf::transport_dummy_msg_disposer>()),
         listener_(), hostname_(hostname), port_(port), listening_addr_(),
         is_listening_(false) {}
 
@@ -125,7 +122,7 @@ public:
 
     // open listener
     winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
     winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener_->BeginOpen(callback.get(), ctx.put());
     if (hr != S_OK) {
@@ -153,7 +150,7 @@ public:
       return S_OK;
     }
     winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
     winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     HRESULT hr;
     hr = listener_->BeginClose(callback.get(), ctx.put());
@@ -168,7 +165,7 @@ public:
       BOOST_LOG_TRIVIAL(error) << "cannot EndClose: " << hr;
       return hr;
     }
-    this->listener_.reset();
+    this->listener_ = nullptr;
     this->is_listening_ = false;
     return S_OK;
   }
@@ -193,7 +190,7 @@ public:
                winrt::com_ptr<IFabricTransportMessage> &reply) {
     HRESULT hr = S_OK;
     winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
     winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = client_->BeginRequest(request.get(), 1000, callback.get(), ctx.put());
 

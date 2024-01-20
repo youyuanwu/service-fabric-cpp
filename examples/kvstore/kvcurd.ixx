@@ -18,7 +18,7 @@ namespace sf = servicefabric;
 // caller need to rollback if failed
 HRESULT commit_helper(winrt::com_ptr<IFabricTransaction> &tx) {
   winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-      sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+      winrt::make<sf::FabricAsyncOperationWaitableCallback>();
   winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
   HRESULT hr;
