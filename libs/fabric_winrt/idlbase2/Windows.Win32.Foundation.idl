@@ -1,0 +1,48 @@
+import "inspectable.idl";
+import "AsyncInfo.idl";
+import "EventToken.idl";
+import "Windows.Foundation.idl";
+
+// Forward Declare
+namespace Windows
+{
+    namespace Win32
+    {
+        namespace Foundation
+        {
+            typedef struct BOOLEAN BOOLEAN;
+            typedef struct BOOL BOOL;
+            typedef struct FILETIME FILETIME;
+            typedef struct HRESULT HRESULT;
+            typedef struct PWSTR PWSTR;
+
+
+            struct BOOLEAN
+            {
+                BYTE Value;
+            };
+
+            
+            struct BOOL
+            {
+                INT32 Value;
+            };
+
+            struct FILETIME
+            {
+                UINT32 dwLowDateTime;
+                UINT32 dwHighDateTime;
+            };
+
+            struct HRESULT
+            {
+                INT32 Value;
+            };
+
+            struct PWSTR
+            {
+                WCHAR* Value;
+            };
+        }
+    }
+}
