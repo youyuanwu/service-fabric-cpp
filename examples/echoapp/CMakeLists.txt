@@ -13,10 +13,6 @@ target_link_libraries(echomain
     PRIVATE FabricRuntime    
 )
 
-target_compile_definitions(echomain
-    PRIVATE _WIN32_WINNT=0x0601
-)
-
 set(_pkg_root ${CMAKE_BINARY_DIR}/echoapp_root)
 
 # package the app

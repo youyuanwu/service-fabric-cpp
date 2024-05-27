@@ -39,7 +39,7 @@ jobs:
     - name: Setup vcpkg (it does not install any package yet)
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: 486a4640db740f5994e492eb60748111dfc48de7
+        vcpkgGitCommitId: 01f602195983451bc83e72f4214af2cbc495aa94
 
     - name: check sf exist
       run: Powershell.exe -File .\scripts\check_sf_installed.ps1

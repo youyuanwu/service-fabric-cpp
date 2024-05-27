@@ -22,7 +22,6 @@ target_link_libraries(fabric_ext
 
 target_compile_definitions(fabric_ext
   PUBLIC WIN32_LEAN_AND_MEAN # This is to get rid of include from fabric of winsock.h
-  PUBLIC _WIN32_WINNT=0x601  # This is to pin the log version
 )
 
 # good practice

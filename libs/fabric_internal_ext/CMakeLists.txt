@@ -20,7 +20,6 @@ target_link_libraries(${_lib_name}
 
 target_compile_definitions(${_lib_name}
   PUBLIC WIN32_LEAN_AND_MEAN # This is to get rid of include from fabric of winsock.h
-  PUBLIC _WIN32_WINNT=0x601  # This is to pin the log version
 )
 
 set_property(TARGET ${_lib_name} PROPERTY CXX_STANDARD 20)

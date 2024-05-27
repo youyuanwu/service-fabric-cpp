@@ -18,10 +18,6 @@ target_link_libraries(kvstore_lib
     PUBLIC FabricTransport
     PUBLIC Boost::program_options
 )
-target_compile_definitions(kvstore_lib
-    PUBLIC _WIN32_WINNT=0x0601
-)
-
 
 set(_exe_name kvstore)
 add_executable(${_exe_name} kvstore_main.cpp)

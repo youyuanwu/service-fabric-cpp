@@ -18,7 +18,6 @@ target_link_libraries(${_test_name}
 
 target_compile_definitions(${_test_name}
   PUBLIC WIN32_LEAN_AND_MEAN # This is to get rid of include from fabric of winsock.h
-  PUBLIC _WIN32_WINNT=0x601  # This is to pin the log version
   PUBLIC SF_DEBUG=1
 )
 

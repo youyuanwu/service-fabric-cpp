@@ -38,6 +38,9 @@ if(${service_fabric_MAIN_PROJECT})
 include(cmake/clang-format.cmake)
 endif(${service_fabric_MAIN_PROJECT})
 
+# This is to pin the log version
+add_compile_definitions(_WIN32_WINNT=0x0602)
+
 message(STATUS "fetching fabric_metadata")
 include(FetchContent)
 FetchContent_Declare(fabric_metadata
