@@ -13,19 +13,19 @@
 interface IErrorInfo : public IUnknown {
 public:
   virtual HRESULT STDMETHODCALLTYPE GetGUID(
-      /* [out] */ GUID *pGUID) = 0;
+      /* [out] */ GUID * pGUID) = 0;
 
   virtual HRESULT STDMETHODCALLTYPE GetSource(
-      /* [out] */ BSTR *pBstrSource) = 0;
+      /* [out] */ BSTR * pBstrSource) = 0;
 
   virtual HRESULT STDMETHODCALLTYPE GetDescription(
-      /* [out] */ BSTR *pBstrDescription) = 0;
+      /* [out] */ BSTR * pBstrDescription) = 0;
 
   virtual HRESULT STDMETHODCALLTYPE GetHelpFile(
-      /* [out] */ BSTR *pBstrHelpFile) = 0;
+      /* [out] */ BSTR * pBstrHelpFile) = 0;
 
   virtual HRESULT STDMETHODCALLTYPE GetHelpContext(
-      /* [out] */ DWORD *pdwHelpContext) = 0;
+      /* [out] */ DWORD * pdwHelpContext) = 0;
 };
 
 #endif

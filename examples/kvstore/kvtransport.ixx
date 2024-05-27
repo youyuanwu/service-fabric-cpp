@@ -8,7 +8,9 @@ module;
 #include "fabrictransport_.h"
 #include <winrt/base.h>
 
+#ifdef SF_DEBUG
 #include <boost/log/trivial.hpp>
+#endif
 
 #include "servicefabric/async_context.hpp"
 #include "servicefabric/waitable_callback.hpp"
@@ -115,8 +117,10 @@ public:
         conn_handler_.get(), msg_disposer_.get(), listener_.put());
 
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(error)
           << "cannot CreateFabricTransportListener: " << hr;
+#endif
       return hr;
     }
 
@@ -126,18 +130,24 @@ public:
     winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener_->BeginOpen(callback.get(), ctx.put());
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(error) << "cannot BeginOpen: " << hr;
+#endif
       return hr;
     }
     callback->Wait();
     winrt::com_ptr<IFabricStringResult> addr_str;
     hr = listener_->EndOpen(ctx.get(), addr_str.put());
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(error) << "cannot EndOpen: " << hr;
+#endif
       return hr;
     }
     this->listening_addr_ = std::wstring(addr_str->get_String());
+#ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "Listening on address: " << listening_addr_;
+#endif
     this->is_listening_ = true;
     return S_OK;
   }
@@ -156,13 +166,17 @@ public:
     hr = listener_->BeginClose(callback.get(), ctx.put());
 
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(error) << "cannot BeginClose: " << hr;
+#endif
       return hr;
     }
     callback->Wait();
     hr = listener_->EndClose(ctx.get());
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(error) << "cannot EndClose: " << hr;
+#endif
       return hr;
     }
     this->listener_ = nullptr;
@@ -195,13 +209,17 @@ public:
     hr = client_->BeginRequest(request.get(), 1000, callback.get(), ctx.put());
 
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(error) << "cannot BeginRequest: " << hr;
+#endif
       return hr;
     }
     callback->Wait();
     hr = client_->EndRequest(ctx.get(), reply.put());
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(error) << "cannot EndRequest: " << hr;
+#endif
       return hr;
     }
     return S_OK;

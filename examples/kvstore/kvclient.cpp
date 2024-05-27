@@ -15,7 +15,9 @@
 #include "servicefabric/transport_message.hpp"
 #include "servicefabric/waitable_callback.hpp"
 
+#ifdef SF_DEBUG
 #include "boost/log/trivial.hpp"
+#endif
 
 import kvtransport;
 
@@ -41,13 +43,12 @@ int main() {
   std::wstring addr_str = L"";
 
   winrt::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
-      sf::transport_dummy_client_notification_handler::create_instance()
-          .to_ptr();
+      winrt::make<sf::transport_dummy_client_notification_handler>();
 
   winrt::com_ptr<IFabricTransportClientEventHandler> client_event_h =
-      sf::transport_dummy_client_conn_handler::create_instance().to_ptr();
+      winrt::make<sf::transport_dummy_client_conn_handler>();
   winrt::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
-      sf::transport_dummy_msg_disposer::create_instance().to_ptr();
+      winrt::make<sf::transport_dummy_msg_disposer>();
   ;
   winrt::com_ptr<IFabricTransportClient> client;
 
@@ -63,24 +64,30 @@ int main() {
       /* [in] */ client_msg_disposer.get(),
       /* [retval][out] */ client.put());
   if (hr != S_OK) {
+#ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug) << "CreateFabricTransportClient failed: " << hr;
+#endif
     return hr;
   }
 
   // open client
   {
     winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
     winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = client->BeginOpen(1000, callback.get(), ctx.put());
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(debug) << "BeginOpen failed: " << hr;
+#endif
       return hr;
     }
     callback->Wait();
     hr = client->EndOpen(ctx.get());
     if (hr != S_OK) {
+#ifdef SF_DEBUG
       BOOST_LOG_TRIVIAL(debug) << "EndOpen failed: " << hr;
+#endif
       return hr;
     }
   }
