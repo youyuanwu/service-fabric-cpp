@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.27)
 
 set(service_fabric_MAIN_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -11,7 +11,8 @@ if(service_fabric_MAIN_PROJECT)
     if ("$ENV{VCPKG_ROOT}" STREQUAL "")
     message(FATAL_ERROR "VCPKG_ROOT not found")
     endif()
-    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    cmake_path(SET _vcpkg_cmake_file "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    set(CMAKE_TOOLCHAIN_FILE "${_vcpkg_cmake_file}")
     # these vars are not working
     # set(VCPKG_TARGET_ARCHITECTURE "x64")
     # set(VCPKG_CRT_LINKAGE "static")

@@ -10,20 +10,7 @@ jobs:
         BUILD_TYPE: ["Debug", "Release"]
         os: [ windows-2022 ]
     steps:
-    - name: find latest win sdk
-      run: |
-          $sdkver = Get-ChildItem "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Kits\Installed Roots\" | Select-Object -Last 1 -ExpandProperty PSChildName
-          echo "Using win sdkver $sdkver"
-          echo $env:GITHUB_ENV
-          echo "sdkver=$sdkver" >> $env:GITHUB_ENV
-      shell: pwsh
-
-    - name: check sdkver env is set
-      run: |
-        echo "sdk ver is ${{ env.sdkver }}"
-      shell: pwsh
-
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Show VC version
       run: |
@@ -39,7 +26,7 @@ jobs:
     - name: Setup vcpkg (it does not install any package yet)
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: 01f602195983451bc83e72f4214af2cbc495aa94
+        vcpkgGitCommitId: 85392b146fdbdb1ef68cb3bfd48e9ee9a6311064
 
     - name: check sf exist
       run: Powershell.exe -File .\scripts\check_sf_installed.ps1
@@ -48,7 +35,7 @@ jobs:
     # github runner has multiple versions of winsdk installed, and we use the latest one.
     - name: run cmake
       run: > 
-        cmake . -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -B build -T host=x64 -A x64 -DCMAKE_SYSTEM_VERSION="${{ env.sdkver }}"
+        cmake . -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -B build -T host=x64 -A x64
     - name: run build
       run: cmake --build build --config ${{ matrix.BUILD_TYPE }}
 

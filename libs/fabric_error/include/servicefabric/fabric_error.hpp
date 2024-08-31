@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <string_view>
+#include <string>
 #include <winerror.h>
 
 namespace servicefabric {
