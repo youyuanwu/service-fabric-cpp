@@ -8,9 +8,7 @@ module;
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
 
-#ifdef SF_DEBUG
-#include <boost/log/trivial.hpp>
-#endif
+#include <spdlog/spdlog.h>
 
 #include <winrt/base.h>
 
@@ -41,9 +39,7 @@ public:
       /* [in] */ IFabricStatefulServicePartition *partition,
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "kv_replica::BeginOpen";
-#endif
+    spdlog::debug("kv_replica::BeginOpen");
     if (openMode == FABRIC_REPLICA_OPEN_MODE_INVALID) {
       return E_ABORT;
     }
@@ -52,30 +48,21 @@ public:
       return E_POINTER;
     }
     HRESULT hr;
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "open mode: " << openMode;
-#endif
+    spdlog::debug("open mode: {}", static_cast<int>(openMode));
     FABRIC_SERVICE_PARTITION_INFORMATION info = {};
     const FABRIC_SERVICE_PARTITION_INFORMATION *infoPtr = &info;
     hr = partition->GetPartitionInfo(&infoPtr);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error)
-          << "kv_replica::BeginOpen GetPartitionInfo failed: " << hr << " "
-          << sf::get_fabric_error_str(hr);
-#endif
+      spdlog::error("kv_replica::BeginOpen GetPartitionInfo failed: {} {}", hr,
+                    sf::get_fabric_error_str(hr));
       return hr;
     }
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug)
-        << "kv_replica::BeginOpen  partition kind: " << info.Kind;
-#endif
+    spdlog::debug("kv_replica::BeginOpen  partition kind: {}",
+                  static_cast<int>(info.Kind));
     hr = store_->BeginOpen(openMode, partition, callback, context);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "kv_replica::BeginOpen failed: " << hr << " "
-                               << sf::get_fabric_error_str(hr);
-#endif
+      spdlog::error("kv_replica::BeginOpen failed: {} {}", hr,
+                    sf::get_fabric_error_str(hr));
     }
     return hr;
   }
@@ -83,15 +70,11 @@ public:
   HRESULT STDMETHODCALLTYPE EndOpen(
       /* [in] */ IFabricAsyncOperationContext *context,
       /* [retval][out] */ IFabricReplicator **replicator) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "kv_replica::EndOpen";
-#endif
+    spdlog::debug("kv_replica::EndOpen");
     HRESULT hr = store_->EndOpen(context, replicator);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "kv_replica::EndOpen failed: " << hr << " "
-                               << sf::get_fabric_error_str(hr);
-#endif
+      spdlog::error("kv_replica::EndOpen failed: {} {}", hr,
+                    sf::get_fabric_error_str(hr));
     }
     return hr;
   }
@@ -100,30 +83,21 @@ public:
       /* [in] */ FABRIC_REPLICA_ROLE newRole,
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "kv_replica::BeginChangeRole";
-#endif
+    spdlog::debug("kv_replica::BeginChangeRole");
     HRESULT hr;
     if (newRole == FABRIC_REPLICA_ROLE_PRIMARY) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(debug)
-          << "kv_replica::BeginChangeRole primary. Open transport.";
-#endif
+      spdlog::debug("kv_replica::BeginChangeRole primary. Open transport.");
       hr = server_->open();
       if (hr != S_OK) {
-#ifdef SF_DEBUG
-        BOOST_LOG_TRIVIAL(error)
-            << "kv_replica::BeginChangeRole transport open failed: " << hr;
-#endif
+        spdlog::error("kv_replica::BeginChangeRole transport open failed: {}",
+                      hr);
         return hr;
       }
     }
     role_ = newRole;
     hr = store_->BeginChangeRole(newRole, callback, context);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(debug) << "kv_replica::BeginChangeRole failed " << hr;
-#endif
+      spdlog::debug("kv_replica::BeginChangeRole failed {}", hr);
     }
     return hr;
   }
@@ -131,9 +105,7 @@ public:
   HRESULT STDMETHODCALLTYPE EndChangeRole(
       /* [in] */ IFabricAsyncOperationContext *context,
       /* [retval][out] */ IFabricStringResult **serviceAddress) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "kv_replica::EndChangeRole";
-#endif
+    spdlog::debug("kv_replica::EndChangeRole");
     HRESULT hr;
     if (role_ == FABRIC_REPLICA_ROLE_PRIMARY) {
       std::wstring addr = server_->get_listening_addr();
@@ -149,10 +121,8 @@ public:
     winrt::com_ptr<IFabricStringResult> store_address;
     hr = store_->EndChangeRole(context, store_address.put());
     if (hr == S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(debug) << "kv_replica::EndChangeRole store_address: "
-                               << std::wstring(store_address->get_String());
-#endif
+      spdlog::debug(L"kv_replica::EndChangeRole store_address: {}",
+                    std::wstring(store_address->get_String()));
     }
     return hr;
   }
@@ -160,32 +130,24 @@ public:
   HRESULT STDMETHODCALLTYPE BeginClose(
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "kv_replica::BeginClose";
-#endif
+    spdlog::debug("kv_replica::BeginClose");
     return store_->BeginClose(callback, context);
   }
 
   HRESULT STDMETHODCALLTYPE EndClose(
       /* [in] */ IFabricAsyncOperationContext *context) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "kv_replica::EndClose";
-#endif
+    spdlog::debug("kv_replica::EndClose");
     HRESULT hr;
     hr = server_->close(); // close on unopened is ok
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error)
-          << "kv_replica::EndOpen transport close failed: " << hr;
-#endif
+      spdlog::error("kv_replica::EndOpen transport close failed: {}", hr);
+      return hr;
     }
     return store_->EndClose(context);
   }
 
   void STDMETHODCALLTYPE Abort(void) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "kv_replica::Abort";
-#endif
+    spdlog::debug("kv_replica::Abort");
   }
 
 private:
@@ -199,9 +161,7 @@ class datastore_event_handler
                                IFabricStoreEventHandler> {
 public:
   void STDMETHODCALLTYPE OnDataLoss(void) override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "datastore_event_handler::OnDataLoss";
-#endif
+    spdlog::debug("datastore_event_handler::OnDataLoss");
   }
 };
 
@@ -259,54 +219,34 @@ public:
       /* [in] */ FABRIC_REPLICA_ID replicaId,
       /* [retval][out] */ IFabricStatefulServiceReplica **serviceReplica)
       override {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "service_factory::CreateReplica";
-#endif
+    spdlog::debug("service_factory::CreateReplica");
 
     std::string data;
     if (initializationDataLength > 0 && initializationData != nullptr) {
       data = std::string(initializationData,
                          initializationData + initializationDataLength);
     }
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug)
-        << "service_factory::CreateInstance "
-        << "serviceTypeName " << serviceTypeName << "serviceName "
-        << serviceName << " initializationDataLength "
-        << initializationDataLength << " initializationData "
-        << data
-        // << "partitionId " << partitionId
-        << " replicaId " << replicaId;
-#else
-    UNREFERENCED_PARAMETER(serviceTypeName);
-    UNREFERENCED_PARAMETER(serviceName);
-    UNREFERENCED_PARAMETER(initializationDataLength);
-    UNREFERENCED_PARAMETER(initializationData);
-    UNREFERENCED_PARAMETER(partitionId);
-#endif
+    spdlog::debug(L"service_factory::CreateInstance "
+                  L"serviceTypeName {} serviceName {} initializationDataLength "
+                  L"{} initializationData {}",
+                  serviceTypeName, serviceName, initializationDataLength,
+                  data.length());
     ULONG port = 0;
     HRESULT hr = resolver_->get_port(L"KvReplicatorEndpoint", port);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "Cannot get port: " << hr;
-#endif
+      spdlog::error("Cannot get port: {}", hr);
       return hr;
     }
 
     ULONG transport_port = 0;
     hr = resolver_->get_port(L"KvTransportEndpoint", transport_port);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "Cannot get KvTransportEndpoint port: " << hr;
-#endif
+      spdlog::error("Cannot get KvTransportEndpoint port: {}", hr);
       return hr;
     }
 
     std::wstring replicatorAddress = hostname_ + L":" + std::to_wstring(port);
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug)
-        << "Using replicatorAddress: " << replicatorAddress;
-#endif
+    spdlog::debug(L"Using replicatorAddress: {}", replicatorAddress);
     FABRIC_REPLICATOR_SETTINGS replicatorSettings = {0};
     replicatorSettings.ReplicatorAddress = replicatorAddress.c_str();
     replicatorSettings.Flags = FABRIC_REPLICATOR_ADDRESS;
@@ -320,10 +260,7 @@ public:
         FABRIC_LOCAL_STORE_KIND_ESE, NULL, event_handler_.get(),
         (void **)store.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(debug)
-          << "service_factory::CreateReplica Failed: " << hr;
-#endif
+      spdlog::debug("service_factory::CreateReplica Failed: {}", hr);
       return hr;
     }
 

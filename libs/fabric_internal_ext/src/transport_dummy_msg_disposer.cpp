@@ -5,6 +5,7 @@
 // ------------------------------------------------------------
 
 #include "servicefabric/transport_dummy_msg_disposer.hpp"
+#include <spdlog/spdlog.h>
 
 namespace servicefabric {
 
@@ -13,9 +14,7 @@ void STDMETHODCALLTYPE transport_dummy_msg_disposer::Dispose(
     /* [size_is][in] */ IFabricTransportMessage **messages) {
   UNREFERENCED_PARAMETER(Count);
   UNREFERENCED_PARAMETER(messages);
-#ifdef SF_DEBUG
   spdlog::debug("msg_disposer::Dispose count {}", Count);
-#endif
 }
 
 } // namespace servicefabric

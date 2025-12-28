@@ -27,19 +27,12 @@ public:
       /* [in] */ IFabricAsyncOperationCallback *callback,
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
-#ifdef SF_DEBUG
-    spdlog::debug("request_handler::BeginProcessRequest id: {}", clientId);
-#else
-    UNREFERENCED_PARAMETER(clientId);
-#endif
-#ifdef SF_DEBUG
+    spdlog::debug(L"request_handler::BeginProcessRequest id: {}", clientId);
+
     std::string body = sf::get_body(message);
     std::string headers = sf::get_header(message);
     spdlog::debug("request_handler::BeginProcessRequest header: {} body: {}",
                   headers, body);
-#else
-    UNREFERENCED_PARAMETER(message);
-#endif
 
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         winrt::make<sf::async_context>(callback);
@@ -51,9 +44,7 @@ public:
       /* [in] */ IFabricAsyncOperationContext *context,
       /* [retval][out] */ IFabricTransportMessage **reply) override {
     UNREFERENCED_PARAMETER(context);
-#ifdef SF_DEBUG
     spdlog::debug("request_handler::EndProcessRequest");
-#endif
     winrt::com_ptr<IFabricTransportMessage> msg1 =
         winrt::make<sf::transport_message>("mybodyreply", "myheaderreply");
     *reply = msg1.detach();
@@ -65,9 +56,7 @@ public:
       /* [in] */ IFabricTransportMessage *message) override {
     UNREFERENCED_PARAMETER(clientId);
     UNREFERENCED_PARAMETER(message);
-#ifdef SF_DEBUG
     spdlog::debug("request_handler::HandleOneWay");
-#endif
     return S_OK;
   }
 };

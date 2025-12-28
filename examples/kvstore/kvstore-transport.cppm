@@ -8,9 +8,7 @@ module;
 #include "fabrictransport_.h"
 #include <winrt/base.h>
 
-#ifdef SF_DEBUG
-#include <boost/log/trivial.hpp>
-#endif
+#include <spdlog/spdlog.h>
 
 #include "servicefabric/async_context.hpp"
 #include "servicefabric/waitable_callback.hpp"
@@ -43,18 +41,11 @@ public:
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(clientId);
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug)
-        << "request_handler::BeginProcessRequest id: " << clientId;
-#endif
+    spdlog::debug(L"request_handler::BeginProcessRequest id: {}", clientId);
     std::string body = sf::get_body(message);
     std::string headers = sf::get_header(message);
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug)
-        << "request_handler::BeginProcessRequest header: " << headers
-        << " body: " << body;
-#endif
-
+    spdlog::debug("request_handler::BeginProcessRequest header: {} body: {}",
+                  headers, body);
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         winrt::make<sf::async_context>(callback);
     *context = ctx.detach();
@@ -65,9 +56,7 @@ public:
       /* [in] */ IFabricAsyncOperationContext *context,
       /* [retval][out] */ IFabricTransportMessage **reply) override {
     UNREFERENCED_PARAMETER(context);
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "request_handler::EndProcessRequest";
-#endif
+    spdlog::debug("request_handler::EndProcessRequest");
     winrt::com_ptr<IFabricTransportMessage> msg1 =
         winrt::make<sf::transport_message>("mybodyreply", "myheaderreply");
     *reply = msg1.detach();
@@ -79,9 +68,7 @@ public:
       /* [in] */ IFabricTransportMessage *message) override {
     UNREFERENCED_PARAMETER(clientId);
     UNREFERENCED_PARAMETER(message);
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "request_handler::HandleOneWay";
-#endif
+    spdlog::debug("request_handler::HandleOneWay");
     return S_OK;
   }
 };
@@ -119,10 +106,7 @@ public:
         conn_handler_.get(), msg_disposer_.get(), listener_.put());
 
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error)
-          << "cannot CreateFabricTransportListener: " << hr;
-#endif
+      spdlog::error("cannot CreateFabricTransportListener: {}", hr);
       return hr;
     }
 
@@ -132,24 +116,18 @@ public:
     winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener_->BeginOpen(callback.get(), ctx.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot BeginOpen: " << hr;
-#endif
+      spdlog::error("cannot BeginOpen: {}", hr);
       return hr;
     }
     callback->Wait();
     winrt::com_ptr<IFabricStringResult> addr_str;
     hr = listener_->EndOpen(ctx.get(), addr_str.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot EndOpen: " << hr;
-#endif
+      spdlog::error("cannot EndOpen: {}", hr);
       return hr;
     }
     this->listening_addr_ = std::wstring(addr_str->get_String());
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "Listening on address: " << listening_addr_;
-#endif
+    spdlog::debug(L"Listening on address: {}", listening_addr_);
     this->is_listening_ = true;
     return S_OK;
   }
@@ -168,17 +146,13 @@ public:
     hr = listener_->BeginClose(callback.get(), ctx.put());
 
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot BeginClose: " << hr;
-#endif
+      spdlog::error("cannot BeginClose: {}", hr);
       return hr;
     }
     callback->Wait();
     hr = listener_->EndClose(ctx.get());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot EndClose: " << hr;
-#endif
+      spdlog::error("cannot EndClose: {}", hr);
       return hr;
     }
     this->listener_ = nullptr;
@@ -211,17 +185,13 @@ public:
     hr = client_->BeginRequest(request.get(), 1000, callback.get(), ctx.put());
 
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot BeginRequest: " << hr;
-#endif
+      spdlog::error("cannot BeginRequest: {}", hr);
       return hr;
     }
     callback->Wait();
     hr = client_->EndRequest(ctx.get(), reply.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot EndRequest: " << hr;
-#endif
+      spdlog::error("cannot EndRequest: {}", hr);
       return hr;
     }
     return S_OK;

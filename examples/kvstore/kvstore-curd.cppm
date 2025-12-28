@@ -8,9 +8,7 @@ module;
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
 
-#ifdef SF_DEBUG
-#include <boost/log/trivial.hpp>
-#endif
+#include <spdlog/spdlog.h>
 
 #include <servicefabric/waitable_callback.hpp>
 
@@ -27,18 +25,14 @@ HRESULT commit_helper(winrt::com_ptr<IFabricTransaction> &tx) {
   HRESULT hr;
   hr = tx->BeginCommit(1000, callback.get(), ctx.put());
   if (hr != S_OK) {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "cannot BeginCommit: " << hr;
-#endif
+    spdlog::error("cannot BeginCommit: {}", hr);
     return hr;
   }
   callback->Wait();
   FABRIC_SEQUENCE_NUMBER num;
   hr = tx->EndCommit(ctx.get(), &num);
   if (hr != S_OK) {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "cannot EndCommit: " << hr;
-#endif
+    spdlog::error("cannot EndCommit: {}", hr);
     return hr;
   }
   return S_OK;
@@ -53,9 +47,7 @@ public:
     winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
-#endif
+      spdlog::error("cannot open tx: {}", hr);
       return hr;
     }
 
@@ -63,27 +55,21 @@ public:
     bool b;
     this->contains_key(tx, key, b);
     if (b) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(info) << "key already exist: " << key << hr;
-#endif
+      spdlog::info(L"key already exist: {} {}", key, hr);
       tx->Rollback();
       return E_FAIL;
     }
     hr = store_->Add(tx.get(), key.c_str(), static_cast<LONG>(val.size()),
                      (BYTE *)val.c_str());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot do add: " << hr;
-#endif
+      spdlog::error("cannot do add: {}", hr);
       tx->Rollback();
       return hr;
     }
 
     hr = commit_helper(tx);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "commit_helper failed: " << hr;
-#endif
+      spdlog::error("commit_helper failed: {}", hr);
       tx->Rollback();
       return hr;
     }
@@ -95,9 +81,7 @@ public:
     winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
-#endif
+      spdlog::error("cannot open tx: {}", hr);
       return hr;
     }
 
@@ -105,27 +89,21 @@ public:
     bool b;
     hr = this->contains_key(tx, key, b);
     if (!b) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(info) << "key does not exist: " << key << hr;
-#endif
+      spdlog::info(L"key does not exist: {} {}", key, hr);
       tx->Rollback();
       return E_FAIL;
     }
     FABRIC_SEQUENCE_NUMBER dummy_num;
     hr = this->get_helper(tx, key, val, dummy_num);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "get_helper failed: " << hr;
-#endif
+      spdlog::error("get_helper failed: {}", hr);
       tx->Rollback();
       return hr;
     }
 
     hr = commit_helper(tx);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "commit_helper failed: " << hr;
-#endif
+      spdlog::error("commit_helper failed: {}", hr);
       tx->Rollback();
       return hr;
     }
@@ -137,9 +115,7 @@ public:
     winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
-#endif
+      spdlog::error("cannot open tx: {}", hr);
       return hr;
     }
 
@@ -147,9 +123,7 @@ public:
     bool b;
     hr = this->contains_key(tx, key, b);
     if (!b) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(info) << "key does not exist: " << key << hr;
-#endif
+      spdlog::info(L"key does not exist: {} {}", key, hr);
       tx->Rollback();
       return E_FAIL;
     }
@@ -159,9 +133,7 @@ public:
     FABRIC_SEQUENCE_NUMBER seq_num;
     hr = this->get_helper(tx, key, dummy_val, seq_num);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "get_helper failed: " << hr;
-#endif
+      spdlog::error("get_helper failed: {}", hr);
       tx->Rollback();
       return hr;
     }
@@ -169,9 +141,7 @@ public:
     // do put
     hr = this->put_helper(tx, key, val, seq_num);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "put_helper failed: " << hr;
-#endif
+      spdlog::error("put_helper failed: {}", hr);
       tx->Rollback();
       return hr;
     }
@@ -183,9 +153,7 @@ public:
     winrt::com_ptr<IFabricTransaction> tx;
     hr = store_->CreateTransaction(tx.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot open tx: " << hr;
-#endif
+      spdlog::error("cannot open tx: {}", hr);
       return hr;
     }
 
@@ -193,9 +161,7 @@ public:
     bool b;
     hr = this->contains_key(tx, key, b);
     if (!b) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(info) << "key does not exist: " << key << hr;
-#endif
+      spdlog::info(L"key does not exist: {} {}", key, hr);
       tx->Rollback();
       return E_FAIL;
     }
@@ -205,9 +171,7 @@ public:
     FABRIC_SEQUENCE_NUMBER seq_num;
     hr = this->get_helper(tx, key, dummy_val, seq_num);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "get_helper failed: " << hr;
-#endif
+      spdlog::error("get_helper failed: {}", hr);
       tx->Rollback();
       return hr;
     }
@@ -215,9 +179,7 @@ public:
     // do remove
     hr = this->remove_helper(tx, key, seq_num);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "put_helper failed: " << hr;
-#endif
+      spdlog::error("put_helper failed: {}", hr);
       tx->Rollback();
       return hr;
     }
@@ -232,9 +194,7 @@ private:
     BOOLEAN b;
     hr = store_->Contains(tx.get(), key.c_str(), &b);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot do contains: " << hr;
-#endif
+      spdlog::error("cannot do contains: {}", hr);
       return hr;
     }
     ret = b;
@@ -248,9 +208,7 @@ private:
     winrt::com_ptr<IFabricKeyValueStoreItemResult> item;
     hr = store_->Get(tx.get(), key.c_str(), item.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot Get: " << hr;
-#endif
+      spdlog::error("cannot Get: {}", hr);
       return hr;
     }
     const FABRIC_KEY_VALUE_STORE_ITEM *i = item->get_Item();
@@ -268,9 +226,7 @@ private:
     hr = store_->Update(tx.get(), key.c_str(), static_cast<LONG>(val.size()),
                         (BYTE *)val.c_str(), num);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot Update: " << hr;
-#endif
+      spdlog::error("cannot Update: {}", hr);
       return hr;
     }
     return S_OK;
@@ -281,9 +237,7 @@ private:
     HRESULT hr;
     hr = store_->Remove(tx.get(), key.c_str(), num);
     if (hr != S_OK) {
-#ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(error) << "cannot Remove: " << hr;
-#endif
+      spdlog::error("cannot Remove: {}", hr);
       return hr;
     }
     return S_OK;

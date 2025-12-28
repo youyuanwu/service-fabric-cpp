@@ -67,10 +67,7 @@ boost::ut::suite test_fabric_transport = [] {
       hr = listener->EndOpen(ctx.get(), addr_str.put());
       expect(hr == S_OK >> fatal);
     }
-#ifdef SF_DEBUG
-    std::wcout << "Server listening on : " << addr_str->get_String()
-               << std::endl;
-#endif
+    spdlog::debug(L"Server listening on : {}", addr_str->get_String());
 
     winrt::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
         winrt::make<sf::transport_dummy_client_notification_handler>();
@@ -122,10 +119,7 @@ boost::ut::suite test_fabric_transport = [] {
       expect(hr == S_OK >> fatal) << "Error: " << sf::get_fabric_error_str(hr);
       std::string body = sf::get_body(reply.get());
       std::string headers = sf::get_header(reply.get());
-#ifdef SF_DEBUG
-      std::cout << "reply header: " << headers << " body: " << body
-                << std::endl;
-#endif
+      spdlog::debug("reply header: {} body: {}", headers, body);
     }
 
     // close listener

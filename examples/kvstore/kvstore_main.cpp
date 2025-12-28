@@ -8,9 +8,8 @@
 #include "FabricRuntime.h"
 
 #include <asio.hpp>
-#ifdef SF_DEBUG
+
 #include <spdlog/spdlog.h>
-#endif
 
 #include <servicefabric/activation_helpers.hpp>
 #include <servicefabric/fabric_error.hpp>
@@ -23,9 +22,9 @@ namespace net = asio;
 namespace sf = servicefabric;
 
 void timer_loop(net::system_timer *timer, const asio::error_code &) {
-#ifdef SF_DEBUG
+
   spdlog::debug("timer_loop");
-#endif
+
   // Reschedule the timer for 1 second in the future:
   timer->expires_after(std::chrono::seconds(5));
   // Posts the timer event
@@ -34,37 +33,36 @@ void timer_loop(net::system_timer *timer, const asio::error_code &) {
 
 // main logic when running in sf mode
 HRESULT sf_main() {
-#ifdef SF_DEBUG
+
   spdlog::debug("App start.");
-#endif
+
   winrt::com_ptr<IFabricRuntime> fabric_runtime;
   winrt::com_ptr<IFabricCodePackageActivationContext> activation_context;
 
   HRESULT hr =
       ::FabricCreateRuntime(IID_IFabricRuntime, (void **)fabric_runtime.put());
   if (hr != NO_ERROR) {
-#ifdef SF_DEBUG
+
     spdlog::error("FabricCreateRuntime failed: {} {}", hr,
                   sf::get_fabric_error_str(hr));
-#endif
+
     return hr;
   }
 
   hr = ::FabricGetActivationContext(IID_IFabricCodePackageActivationContext,
                                     (void **)activation_context.put());
   if (hr != NO_ERROR) {
-#ifdef SF_DEBUG
+
     spdlog::error("FabricCreateRuntime failed: {}", hr);
-#endif
+
     return hr;
   }
 
   std::wstring hostname;
   hr = sf::get_hostname(hostname);
   if (hr != NO_ERROR) {
-#ifdef SF_DEBUG
+
     spdlog::error("get_hostname failed: {}", hr);
-#endif
   }
 
   // app should run forever until kill.
@@ -78,9 +76,9 @@ HRESULT sf_main() {
       L"KvStoreService", service_factory_com.detach());
 
   if (hr != NO_ERROR) {
-#ifdef SF_DEBUG
+
     spdlog::error("RegisterStatefulServiceFactory failed: {}", hr);
-#endif
+
     return hr;
   }
   return S_OK;
@@ -103,9 +101,9 @@ local_main(winrt::com_ptr<IFabricStatefulServiceFactory> &service_factory_com,
                                           L"fabric:/KvStore/KvStoreService", 0,
                                           nullptr, id, rid, replica.put());
   if (hr != S_OK) {
-#ifdef SF_DEBUG
+
     spdlog::error("CreateReplica failed: {}", hr);
-#endif
+
     return hr;
   }
 
@@ -160,9 +158,8 @@ int main(int argc, char *argv[]) {
   asio::error_code ec;
   net::signal_set signals(io_ctx, SIGINT, SIGTERM);
   signals.async_wait([&io_ctx](auto, auto) {
-#ifdef SF_DEBUG
     spdlog::error("Main thread termination signal");
-#endif
+
     io_ctx.stop();
   });
 

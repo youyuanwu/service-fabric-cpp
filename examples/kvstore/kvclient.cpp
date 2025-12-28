@@ -62,9 +62,7 @@ int main() {
       /* [in] */ client_msg_disposer.get(),
       /* [retval][out] */ client.put());
   if (hr != S_OK) {
-#ifdef SF_DEBUG
     spdlog::debug("CreateFabricTransportClient failed: {}", hr);
-#endif
     return hr;
   }
 
@@ -75,17 +73,13 @@ int main() {
     winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = client->BeginOpen(1000, callback.get(), ctx.put());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
       spdlog::debug("BeginOpen failed: {}", hr);
-#endif
       return hr;
     }
     callback->Wait();
     hr = client->EndOpen(ctx.get());
     if (hr != S_OK) {
-#ifdef SF_DEBUG
       spdlog::debug("EndOpen failed: {}", hr);
-#endif
       return hr;
     }
   }

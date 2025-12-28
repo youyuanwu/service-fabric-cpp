@@ -21,12 +21,8 @@ class conn_event_handler
 public:
   HRESULT STDMETHODCALLTYPE OnConnected(
       /* [in] */ LPCWSTR connectionAddress) override {
-#ifdef SF_DEBUG
     spdlog::debug(L"conn_event_handler::OnConnected connectionAddress: {}",
                   connectionAddress);
-#else
-    UNREFERENCED_PARAMETER(connectionAddress);
-#endif
 
     return S_OK;
   }
@@ -34,14 +30,9 @@ public:
   HRESULT STDMETHODCALLTYPE OnDisconnected(
       /* [in] */ LPCWSTR connectionAddress,
       /* [in] */ HRESULT error) override {
-#ifdef SF_DEBUG
     spdlog::debug(
         L"conn_event_handler::OnDisconnected connectionAddress: {} error: {}",
         connectionAddress, error);
-#else
-    UNREFERENCED_PARAMETER(connectionAddress);
-    UNREFERENCED_PARAMETER(error);
-#endif
 
     return S_OK;
   }

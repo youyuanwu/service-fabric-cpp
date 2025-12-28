@@ -15,6 +15,7 @@ target_link_libraries(${_lib_name}
   INTERFACE asio::asio
   PUBLIC    fabric_internal_sdk 
   PRIVATE   fabric_ext # for async_contxt
+            spdlog::spdlog
 )
 
 target_compile_definitions(${_lib_name}

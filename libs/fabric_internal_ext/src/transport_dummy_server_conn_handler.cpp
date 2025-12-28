@@ -7,6 +7,7 @@
 #include "servicefabric/transport_dummy_server_conn_handler.hpp"
 
 #include <servicefabric/async_context.hpp>
+#include <spdlog/spdlog.h>
 
 namespace servicefabric {
 
@@ -18,9 +19,7 @@ transport_dummy_server_conn_handler::BeginProcessConnect(
     /* [retval][out] */ IFabricAsyncOperationContext **context) {
   UNREFERENCED_PARAMETER(clientConnection);
   UNREFERENCED_PARAMETER(timeoutMilliseconds);
-#ifdef SF_DEBUG
   spdlog::debug("conn_handler::BeginProcessConnect");
-#endif
 
   winrt::com_ptr<IFabricAsyncOperationContext> ctx =
       winrt::make<async_context>(callback);
@@ -34,9 +33,7 @@ HRESULT STDMETHODCALLTYPE
 transport_dummy_server_conn_handler::EndProcessConnect(
     /* [in] */ IFabricAsyncOperationContext *context) {
   UNREFERENCED_PARAMETER(context);
-#ifdef SF_DEBUG
   spdlog::debug("conn_handler::EndProcessConnect");
-#endif
   return S_OK;
 }
 
@@ -48,9 +45,7 @@ transport_dummy_server_conn_handler::BeginProcessDisconnect(
     /* [retval][out] */ IFabricAsyncOperationContext **context) {
   UNREFERENCED_PARAMETER(clientId);
   UNREFERENCED_PARAMETER(timeoutMilliseconds);
-#ifdef SF_DEBUG
   spdlog::debug("conn_handler::BeginProcessDisconnect");
-#endif
   winrt::com_ptr<IFabricAsyncOperationContext> ctx =
       winrt::make<async_context>(callback);
   *context = ctx.detach();
@@ -61,9 +56,7 @@ HRESULT STDMETHODCALLTYPE
 transport_dummy_server_conn_handler::EndProcessDisconnect(
     /* [in] */ IFabricAsyncOperationContext *context) {
   UNREFERENCED_PARAMETER(context);
-#ifdef SF_DEBUG
   spdlog::debug("conn_handler::EndProcessDisconnect");
-#endif
   return S_OK;
 }
 

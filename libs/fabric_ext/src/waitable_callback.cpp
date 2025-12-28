@@ -18,17 +18,13 @@ void FabricAsyncOperationWaitableCallback::Invoke(
     UNREFERENCED_PARAMETER(context);
     std::lock_guard lk(m_);
     ready_ = true;
-#ifdef SF_DEBUG
     spdlog::debug("FabricAsyncOperationWaitableCallback::Invoke");
-#endif
   }
   cv_.notify_all();
 }
 
 void FabricAsyncOperationWaitableCallback::Wait() {
-#ifdef SF_DEBUG
   spdlog::debug("FabricAsyncOperationWaitableCallback::Wait");
-#endif
   std::unique_lock lk(m_);
   cv_.wait(lk, [this] { return ready_; });
 }

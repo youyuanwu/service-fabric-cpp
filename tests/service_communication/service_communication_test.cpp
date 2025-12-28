@@ -79,10 +79,7 @@ boost::ut::suite test_fabric_communication = [] {
       hr = listener->EndOpen(ctx.get(), addr_str.put());
       expect(hr == S_OK);
     }
-#ifdef SF_DEBUG
-    std::wcout << L"Server listening on : " << addr_str->get_String()
-               << std::endl;
-#endif
+    spdlog::debug(L"Server listening on : {}", addr_str->get_String());
     // create client
 
     // This is server to client notification?
@@ -117,12 +114,9 @@ boost::ut::suite test_fabric_communication = [] {
       hr = client->EndRequest(ctx.get(), reply1.put());
       expect(hr == S_OK);
 
-#ifdef SF_DEBUG
       FABRIC_MESSAGE_BUFFER *body = reply1->Get_Body();
-      std::cout << "got reply: "
-                << std::string(body->Buffer, body->Buffer + body->BufferSize)
-                << std::endl;
-#endif
+      spdlog::debug("got reply: {}",
+                    std::string(body->Buffer, body->Buffer + body->BufferSize));
     }
     // client->SendMessageA()
 

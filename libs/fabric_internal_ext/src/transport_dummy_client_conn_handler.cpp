@@ -5,16 +5,15 @@
 // ------------------------------------------------------------
 
 #include "servicefabric/transport_dummy_client_conn_handler.hpp"
+#include <spdlog/spdlog.h>
 
 namespace servicefabric {
 
 HRESULT STDMETHODCALLTYPE transport_dummy_client_conn_handler::OnConnected(
     /* [in] */ LPCWSTR connectionAddress) {
   UNREFERENCED_PARAMETER(connectionAddress);
-#ifdef SF_DEBUG
-  spdlog::debug("client_event_handler::OnConnected addr: {}",
+  spdlog::debug(L"client_event_handler::OnConnected addr: {}",
                 connectionAddress);
-#endif
   return S_OK;
 }
 
@@ -23,10 +22,8 @@ HRESULT STDMETHODCALLTYPE transport_dummy_client_conn_handler::OnDisconnected(
     /* [in] */ HRESULT error) {
   UNREFERENCED_PARAMETER(connectionAddress);
   UNREFERENCED_PARAMETER(error);
-#ifdef SF_DEBUG
-  spdlog::debug("client_event_handler::OnDisconnected addr: {}",
+  spdlog::debug(L"client_event_handler::OnDisconnected addr: {}",
                 connectionAddress);
-#endif
   return S_OK;
 }
 

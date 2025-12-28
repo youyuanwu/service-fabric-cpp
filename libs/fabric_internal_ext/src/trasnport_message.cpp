@@ -5,6 +5,7 @@
 // ------------------------------------------------------------
 
 #include "servicefabric/transport_message.hpp"
+#include <spdlog/spdlog.h>
 
 namespace servicefabric {
 
@@ -15,9 +16,7 @@ void STDMETHODCALLTYPE transport_message::GetHeaderAndBodyBuffer(
     /* [out] */ const FABRIC_TRANSPORT_MESSAGE_BUFFER **headerBuffer,
     /* [out] */ ULONG *msgBufferCount,
     /* [out] */ const FABRIC_TRANSPORT_MESSAGE_BUFFER **MsgBuffers) {
-#ifdef SF_DEBUG
   spdlog::debug("message::GetHeaderAndBodyBuffer");
-#endif
   // todo: return only parts that has the pointers.
   if (headerBuffer == nullptr || msgBufferCount == nullptr ||
       MsgBuffers == nullptr) {
@@ -35,9 +34,7 @@ void STDMETHODCALLTYPE transport_message::GetHeaderAndBodyBuffer(
 }
 
 void STDMETHODCALLTYPE transport_message::Dispose(void) {
-#ifdef SF_DEBUG
   spdlog::debug("message::Dispose");
-#endif
 }
 
 std::string get_header(IFabricTransportMessage *message) {

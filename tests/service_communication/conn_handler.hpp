@@ -23,9 +23,8 @@ public:
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(clientConnection);
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
-#ifdef SF_DEBUG
+
     spdlog::debug("conn_handler::BeginProcessConnect");
-#endif
 
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         winrt::make<sf::async_context>(callback);
@@ -38,9 +37,9 @@ public:
   HRESULT STDMETHODCALLTYPE EndProcessConnect(
       /* [in] */ IFabricAsyncOperationContext *context) override {
     UNREFERENCED_PARAMETER(context);
-#ifdef SF_DEBUG
+
     spdlog::debug("conn_handler::EndProcessConnect");
-#endif
+
     return S_OK;
   };
 
@@ -51,9 +50,9 @@ public:
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(clientId);
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
-#ifdef SF_DEBUG
+
     spdlog::debug("conn_handler::BeginProcessDisconnect");
-#endif
+
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         winrt::make<sf::async_context>(callback);
     *context = ctx.detach();
@@ -63,9 +62,9 @@ public:
   HRESULT STDMETHODCALLTYPE EndProcessDisconnect(
       /* [in] */ IFabricAsyncOperationContext *context) override {
     UNREFERENCED_PARAMETER(context);
-#ifdef SF_DEBUG
+
     spdlog::debug("conn_handler::EndProcessDisconnect");
-#endif
+
     return S_OK;
   };
 };
