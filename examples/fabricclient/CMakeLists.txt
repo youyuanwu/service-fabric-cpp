@@ -11,5 +11,6 @@ foreach(exe_file ${SOURCES})
     target_link_libraries(${exe_name} 
         PRIVATE fabric_ext fabric_error FabricClient 
         argparse::argparse
+        spdlog::spdlog
     )
 endforeach()

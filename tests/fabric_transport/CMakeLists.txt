@@ -9,6 +9,7 @@ target_link_libraries(${_test_name}
     fabric_error
     fabric_ext
     fabric_internal_ext
+    spdlog::spdlog
 )
 
 target_compile_definitions(${_test_name}

@@ -5,7 +5,7 @@
 // ------------------------------------------------------------
 
 #include "echo_server.hpp"
-#include <boost/log/trivial.hpp>
+#include <spdlog/spdlog.h>
 
 using tcp = boost::asio::ip::tcp;
 

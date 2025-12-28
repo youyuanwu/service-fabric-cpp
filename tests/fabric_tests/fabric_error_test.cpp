@@ -4,8 +4,6 @@
 // license information.
 // ------------------------------------------------------------
 
-#include <boost/log/trivial.hpp>
-
 #include <boost/ut.hpp>
 
 #include "FabricTypes.h"

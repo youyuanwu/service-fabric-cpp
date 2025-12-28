@@ -4,7 +4,7 @@
 // license information.
 // ------------------------------------------------------------
 
-#include <boost/log/trivial.hpp>
+#include <spdlog/spdlog.h>
 
 #include <FabricClient.h>
 
@@ -28,11 +28,11 @@ int main() {
       ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
 
   if (hr != NO_ERROR) {
-    BOOST_LOG_TRIVIAL(error) << "FabricCreateLocalClient failed: " << hr;
+    spdlog::error("FabricCreateLocalClient failed: {}", hr);
     return EXIT_FAILURE;
   }
 
-  BOOST_LOG_TRIVIAL(info) << "FabricCreateLocalClient success";
+  spdlog::info("FabricCreateLocalClient success");
 
   // try use asio ptr
   boost::system::error_code ec;
@@ -47,18 +47,19 @@ int main() {
   std::function<void(boost::system::error_code, IFabricGetNodeListResult *)>
       node_callback = [](boost::system::error_code ec,
                          IFabricGetNodeListResult *result) {
-        BOOST_LOG_TRIVIAL(info) << "node_callback " << ec << std::endl;
+        spdlog::info("node_callback {}", ec.message());
         if (ec) {
           return;
         }
         const FABRIC_NODE_QUERY_RESULT_LIST *nodeList = result->get_NodeList();
-        BOOST_LOG_TRIVIAL(info) << "node count " << nodeList->Count;
+        spdlog::info("node count {}", nodeList->Count);
         auto nodeItems = nodeList->Items;
         for (std::size_t i = 0; i < nodeList->Count; i++) {
           auto nodeItem = nodeItems + i;
-          BOOST_LOG_TRIVIAL(info) << "node name: " << nodeItem->NodeName
-                                  << "status: " << nodeItem->NodeStatus
-                                  << "version: " << nodeItem->CodeVersion;
+          spdlog::info(L"node name: {} status: {} version: {}",
+                       nodeItem->NodeName,
+                       static_cast<int>(nodeItem->NodeStatus),
+                       std::wstring(nodeItem->CodeVersion));
         }
       };
   op.async_exec(&node_query, node_callback);
@@ -77,7 +78,7 @@ int main() {
                      IFabricGetApplicationTypeListResult * result)>
       app_callback = [](boost::system::error_code ec,
                         IFabricGetApplicationTypeListResult *result) {
-        BOOST_LOG_TRIVIAL(info) << "app_callback " << ec << std::endl;
+        spdlog::info("app_callback {}", ec.message());
         if (ec) {
           return;
         }
@@ -86,8 +87,7 @@ int main() {
         auto list_items = list->Items;
         for (std::size_t i = 0; i < list_count; i++) {
           auto item = list_items + i;
-          BOOST_LOG_TRIVIAL(info)
-              << "apptype name: " << item->ApplicationTypeName;
+          spdlog::info(L"apptype name: {}", item->ApplicationTypeName);
         }
       };
   op2.async_exec(&app_query, app_callback);

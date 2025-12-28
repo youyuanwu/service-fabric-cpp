@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "boost/log/trivial.hpp"
 #include "fabricservicecommunication_.h"
+#include <spdlog/spdlog.h>
 #include <winrt/base.h>
 
 #include "message.hpp"
@@ -27,9 +27,8 @@ public:
     UNREFERENCED_PARAMETER(clientId);
 #ifdef SF_DEBUG
     FABRIC_MESSAGE_BUFFER *body = message->Get_Body();
-    BOOST_LOG_TRIVIAL(debug)
-        << "request_handler::BeginProcessRequest: body "
-        << std::string(body->Buffer, body->Buffer + body->BufferSize);
+    spdlog::debug("request_handler::BeginProcessRequest: body {}",
+                  std::string(body->Buffer, body->Buffer + body->BufferSize));
 #else
     UNREFERENCED_PARAMETER(message);
 #endif
@@ -45,7 +44,7 @@ public:
       /* [retval][out] */ IFabricServiceCommunicationMessage **reply) override {
     UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "request_handler::EndProcessRequest";
+    spdlog::debug("request_handler::EndProcessRequest");
 #endif
     winrt::com_ptr<IFabricServiceCommunicationMessage> msg1 =
         winrt::make<message>("mybodyreply", "myheaderreply");
@@ -59,7 +58,7 @@ public:
     UNREFERENCED_PARAMETER(clientId);
     UNREFERENCED_PARAMETER(message);
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "request_handler::HandleOneWay";
+    spdlog::debug("request_handler::HandleOneWay");
 #endif
     return S_OK;
   }

@@ -11,7 +11,7 @@ target_include_directories(fabric_ext
 target_link_libraries(fabric_ext
   INTERFACE Boost::disable_autolinking Boost::headers
   PUBLIC fabric_sdk
-  PUBLIC Boost::log
+  PRIVATE spdlog::spdlog
 )
 
 #add_dependencies(fabric_ext fabric_import_libs) # make sure import libs are generated
@@ -22,7 +22,7 @@ target_link_libraries(fabric_ext
 
 target_compile_definitions(fabric_ext
   PUBLIC WIN32_LEAN_AND_MEAN # This is to get rid of include from fabric of winsock.h
-  # PRIVATE SF_DEBUG=1 # This might cause boost log to deadlock.
+  # PUBLIC SPDLOG_WCHAR_TO_UTF8_SUPPORT=1
 )
 
 # good practice

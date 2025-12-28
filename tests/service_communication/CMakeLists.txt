@@ -5,11 +5,11 @@ set(_test_name service_communication_test)
 add_executable(${_test_name} ${_test_name}.cpp)
 
 target_link_libraries(${_test_name}
-    PUBLIC Boost::log
     FabricServiceCommunication
     fabric_error
     fabric_ext
     fabric_internal_sdk
+    spdlog::spdlog
 )
 
 target_compile_definitions(${_test_name}

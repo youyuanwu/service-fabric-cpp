@@ -6,7 +6,7 @@
 
 #include "service_factory.hpp"
 #include "app_instance.hpp"
-#include <boost/log/trivial.hpp>
+#include <spdlog/spdlog.h>
 
 service_factory::service_factory(ULONG port, std::wstring hostname)
     : port_(port), hostname_(hostname) {}
@@ -28,14 +28,11 @@ HRESULT STDMETHODCALLTYPE service_factory::CreateInstance(
 
   UNREFERENCED_PARAMETER(partitionId);
 
-  BOOST_LOG_TRIVIAL(debug) << "service_factory::CreateInstance "
-                           << "serviceTypeName " << serviceTypeName
-                           << "serviceName " << serviceName
-                           << "initializationDataLength "
-                           << initializationDataLength << "initializationData"
-                           << data
-                           // << "partitionId " << partitionId
-                           << "instanceId " << instanceId;
+  spdlog::debug(
+      L"service_factory::CreateInstance serviceTypeName {} serviceName {} "
+      L"initializationDataLength {} initializationData {} instanceId {}",
+      serviceTypeName, serviceName, initializationDataLength,
+      std::wstring(data.begin(), data.end()), instanceId);
 
   // create a instance and return
   winrt::com_ptr<IFabricStatelessServiceInstance> instance =

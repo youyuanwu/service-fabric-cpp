@@ -5,7 +5,7 @@
 // ------------------------------------------------------------
 
 #include "FabricClient.h"
-#include <boost/log/trivial.hpp>
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 #include <string>

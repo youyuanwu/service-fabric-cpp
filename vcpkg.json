@@ -4,8 +4,11 @@
   "version": "0.0.1",
   "dependencies": [
     "boost-asio",
-    "boost-log",
     "magic-enum",
+    {
+      "name": "spdlog",
+      "features": ["wchar"]
+    },
     "bext-ut",
     "argparse"
   ]

@@ -55,6 +55,7 @@ if(NOT fabric_metadata_POPULATED)
 endif()
 
 find_package(argparse CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 add_subdirectory(libs)
 

@@ -8,7 +8,7 @@
 
 #include "servicefabric/asio_callback.hpp"
 
-#include "boost/log/trivial.hpp"
+#include <spdlog/spdlog.h>
 
 namespace servicefabric {
 
@@ -40,7 +40,7 @@ public:
       if (hr != NO_ERROR) {
         ec = boost::system::error_code(
             hr, boost::asio::error::get_system_category());
-        BOOST_LOG_TRIVIAL(debug) << "EndOperation failed: " << ec << std::endl;
+        spdlog::debug("EndOperation failed: {}", ec.message());
       }
       token(ec, result.get());
     };
@@ -51,7 +51,7 @@ public:
     if (hr != NO_ERROR) {
       auto ec = boost::system::error_code(
           hr, boost::asio::error::get_system_category());
-      BOOST_LOG_TRIVIAL(debug) << "BeginOperation failed: " << ec << std::endl;
+      spdlog::debug("BeginOperation failed: {}", ec.message());
       // begin failed we need to clean the asio callback?
       BOOST_ASSERT(false);
     }

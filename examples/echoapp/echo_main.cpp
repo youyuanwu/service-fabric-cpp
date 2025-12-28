@@ -5,8 +5,8 @@
 // ------------------------------------------------------------
 
 #include <FabricRuntime.h>
-#include <boost/log/trivial.hpp>
 #include <servicefabric/fabric_error.hpp>
+#include <spdlog/spdlog.h>
 
 #include "loop_timer.hpp"
 #include "service_factory.hpp"
@@ -30,7 +30,7 @@ void wait_for_debugger(int argc, char *argv[]) {
     return;
   }
 
-  BOOST_LOG_TRIVIAL(debug) << "Wait for debugger to be attached";
+  spdlog::debug("Wait for debugger to be attached");
 
   while (!IsDebuggerPresent()) {
     Sleep(1000);
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 
   net::io_context io_ctx;
 
-  BOOST_LOG_TRIVIAL(debug) << "App start.";
+  spdlog::debug("App start.");
 
   winrt::com_ptr<IFabricRuntime> fabric_runtime;
   winrt::com_ptr<IFabricCodePackageActivationContext> activation_context;
@@ -74,22 +74,22 @@ int main(int argc, char *argv[]) {
   HRESULT hr =
       ::FabricCreateRuntime(IID_IFabricRuntime, (void **)fabric_runtime.put());
   if (hr != NO_ERROR) {
-    BOOST_LOG_TRIVIAL(error) << "FabricCreateRuntime failed: " << hr << " "
-                             << sf::get_fabric_error_str(hr);
+    spdlog::error("FabricCreateRuntime failed: {} {}", hr,
+                  sf::get_fabric_error_str(hr));
     return EXIT_FAILURE;
   }
 
   hr = ::FabricGetActivationContext(IID_IFabricCodePackageActivationContext,
                                     (void **)activation_context.put());
   if (hr != NO_ERROR) {
-    BOOST_LOG_TRIVIAL(error) << "FabricCreateRuntime failed: " << hr;
+    spdlog::error("FabricCreateRuntime failed: {}", hr);
     return EXIT_FAILURE;
   }
 
   // app should run forever until kill.
   hr = run_app(fabric_runtime, activation_context);
   if (hr != NO_ERROR) {
-    BOOST_LOG_TRIVIAL(error) << "run_app failed: " << hr;
+    spdlog::error("run_app failed: {}", hr);
     return EXIT_FAILURE;
   }
 
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
   boost::system::error_code ec;
   net::signal_set signals(io_ctx, SIGINT, SIGTERM);
   signals.async_wait([&io_ctx](auto, auto) {
-    BOOST_LOG_TRIVIAL(error) << "Main thread termination signal";
+    spdlog::error("Main thread termination signal");
     io_ctx.stop();
   });
 

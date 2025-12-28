@@ -10,7 +10,8 @@ add_executable(echomain ${SOURCES})
 target_link_libraries(echomain 
     PRIVATE fabric_ext
     PRIVATE fabric_error
-    PRIVATE FabricRuntime    
+    PRIVATE FabricRuntime
+    PRIVATE spdlog::spdlog
 )
 
 set(_pkg_root ${CMAKE_BINARY_DIR}/echoapp_root)

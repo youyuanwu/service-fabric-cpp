@@ -8,7 +8,7 @@
 
 #include "fabricservicecommunication_.h"
 #include "servicefabric/async_context.hpp"
-#include <boost/log/trivial.hpp>
+#include <spdlog/spdlog.h>
 #include <winrt/base.h>
 
 namespace sf = servicefabric;
@@ -24,7 +24,7 @@ public:
     UNREFERENCED_PARAMETER(clientConnection);
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessConnect";
+    spdlog::debug("conn_handler::BeginProcessConnect");
 #endif
 
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
@@ -39,7 +39,7 @@ public:
       /* [in] */ IFabricAsyncOperationContext *context) override {
     UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "conn_handler::EndProcessConnect";
+    spdlog::debug("conn_handler::EndProcessConnect");
 #endif
     return S_OK;
   };
@@ -52,7 +52,7 @@ public:
     UNREFERENCED_PARAMETER(clientId);
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "conn_handler::BeginProcessDisconnect";
+    spdlog::debug("conn_handler::BeginProcessDisconnect");
 #endif
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         winrt::make<sf::async_context>(callback);
@@ -64,7 +64,7 @@ public:
       /* [in] */ IFabricAsyncOperationContext *context) override {
     UNREFERENCED_PARAMETER(context);
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "conn_handler::EndProcessDisconnect";
+    spdlog::debug("conn_handler::EndProcessDisconnect");
 #endif
     return S_OK;
   };

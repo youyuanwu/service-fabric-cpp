@@ -15,6 +15,7 @@
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
 #include <latch>
+#include <spdlog/spdlog.h>
 
 // Tests for reverse wrapper
 // impl is coro but the interface is fabric async.
@@ -387,6 +388,7 @@ boost::ut::suite errors = [] {
     };
   } // end if false
   "asio_fabric_reverse"_test = [] {
+    spdlog::info("asio_fabric_reverse test start");
     net::io_context ioc;
 
     winrt::com_ptr<IFabricStatelessServiceInstance> svc =

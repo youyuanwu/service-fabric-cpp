@@ -15,6 +15,7 @@ foreach(test_file ${SOURCES})
         fabric_ext
         FabricClient
         WindowsApp.lib
+        spdlog::spdlog
     )
     set_property(TARGET ${test_name} PROPERTY CXX_STANDARD 20)
     add_test(NAME ${test_name} COMMAND ${test_name} WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <boost/log/trivial.hpp>
+#include <spdlog/spdlog.h>
 
 #include "fabricservicecommunication_.h"
 #include "servicefabric/async_context.hpp"
@@ -22,9 +22,8 @@ public:
   HRESULT STDMETHODCALLTYPE OnConnected(
       /* [in] */ LPCWSTR connectionAddress) override {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug)
-        << "conn_event_handler::OnConnected connectionAddress: "
-        << connectionAddress;
+    spdlog::debug(L"conn_event_handler::OnConnected connectionAddress: {}",
+                  connectionAddress);
 #else
     UNREFERENCED_PARAMETER(connectionAddress);
 #endif
@@ -36,9 +35,9 @@ public:
       /* [in] */ LPCWSTR connectionAddress,
       /* [in] */ HRESULT error) override {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug)
-        << "conn_event_handler::OnDisconnected connectionAddress: "
-        << connectionAddress << " error: " << error;
+    spdlog::debug(
+        L"conn_event_handler::OnDisconnected connectionAddress: {} error: {}",
+        connectionAddress, error);
 #else
     UNREFERENCED_PARAMETER(connectionAddress);
     UNREFERENCED_PARAMETER(error);
