@@ -11,14 +11,14 @@
 
 namespace servicefabric {
 
-namespace net = boost::asio;
+namespace net = asio;
 namespace sf = servicefabric;
 
 template <typename IClient, typename BeginFunc, typename EndFunc,
           typename RetType, typename... TParams>
-boost::asio::awaitable<HRESULT> async_operation(IClient *client, BeginFunc bf,
-                                                EndFunc ef, RetType **ret,
-                                                TParams... params) {
+asio::awaitable<HRESULT> async_operation(IClient *client, BeginFunc bf,
+                                         EndFunc ef, RetType **ret,
+                                         TParams... params) {
   auto executor = co_await net::this_coro::executor;
   HRESULT hr = S_OK;
   // this is a obj holder
@@ -44,16 +44,16 @@ public:
       : client_(client) {}
 
   // async api
-  boost::asio::awaitable<HRESULT>
+  asio::awaitable<HRESULT>
   GetNodeList(const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
               IFabricGetNodeListResult **ret);
 
   // example without template
-  boost::asio::awaitable<HRESULT>
+  asio::awaitable<HRESULT>
   GetNodeListExample(const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
                      IFabricGetNodeListResult **ret);
 
-  boost::asio::awaitable<HRESULT> GetApplicationTypeList(
+  asio::awaitable<HRESULT> GetApplicationTypeList(
       const FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION *queryDescription,
       IFabricGetApplicationTypeListResult **ret);
 
@@ -66,11 +66,11 @@ public:
   AwaitableFabricHealthClient(winrt::com_ptr<IFabricHealthClient> client)
       : client_(client) {}
 
-  boost::asio::awaitable<HRESULT>
+  asio::awaitable<HRESULT>
   GetClusterHealth(const FABRIC_CLUSTER_HEALTH_POLICY *queryDescription,
                    IFabricClusterHealthResult **ret);
 
-  boost::asio::awaitable<HRESULT>
+  asio::awaitable<HRESULT>
   GetNodeHealth(LPCWSTR nodeName,
                 const FABRIC_CLUSTER_HEALTH_POLICY *queryDescription,
                 IFabricNodeHealthResult **ret);

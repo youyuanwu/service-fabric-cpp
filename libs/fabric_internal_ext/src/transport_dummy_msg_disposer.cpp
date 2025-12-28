@@ -14,8 +14,7 @@ void STDMETHODCALLTYPE transport_dummy_msg_disposer::Dispose(
   UNREFERENCED_PARAMETER(Count);
   UNREFERENCED_PARAMETER(messages);
 #ifdef SF_DEBUG
-  BOOST_LOG_TRIVIAL(debug) << "msg_disposer::Dispose"
-                           << " count " << Count;
+  spdlog::debug("msg_disposer::Dispose count {}", Count);
 #endif
 }
 

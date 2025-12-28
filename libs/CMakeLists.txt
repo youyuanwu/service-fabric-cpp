@@ -5,10 +5,6 @@ endif()
 
 #add_subdirectory(fabric_internal)
 
-# setup boost
-set(Boost_USE_STATIC_LIBS ON) # use static boost
-find_package(Boost REQUIRED COMPONENTS)
-
 add_subdirectory(fabric_common)
 # main extension lib
 add_subdirectory(fabric_ext)

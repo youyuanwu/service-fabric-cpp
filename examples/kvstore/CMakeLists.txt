@@ -14,6 +14,7 @@ target_link_libraries(kvstore_lib
     PUBLIC fabric_error
     PUBLIC FabricRuntime
     PUBLIC FabricTransport
+    PUBLIC spdlog::spdlog
 )
 
 set(_exe_name kvstore)

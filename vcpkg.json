@@ -3,7 +3,7 @@
   "name": "service-fabric-cpp",
   "version": "0.0.1",
   "dependencies": [
-    "boost-asio",
+    "asio",
     "magic-enum",
     {
       "name": "spdlog",

@@ -21,8 +21,7 @@ target_include_directories(${_test_name}
   PRIVATE .
 )
 
-# boost log leaks memory as intended, so do not check mem leaks.
-add_test(NAME ${_test_name} COMMAND ${_test_name} --detect_memory_leaks=0
+add_test(NAME ${_test_name} COMMAND ${_test_name}
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set_tests_properties(${_test_name} PROPERTIES RUN_SERIAL TRUE)

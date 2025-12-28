@@ -7,9 +7,9 @@
 #include "FabricCommon.h"
 #include "FabricRuntime.h"
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #ifdef SF_DEBUG
-#include <boost/log/trivial.hpp>
+#include <spdlog/spdlog.h>
 #endif
 
 #include <servicefabric/activation_helpers.hpp>
@@ -19,12 +19,12 @@
 
 import kvstore;
 
-namespace net = boost::asio;
+namespace net = asio;
 namespace sf = servicefabric;
 
-void timer_loop(net::system_timer *timer, const boost::system::error_code &) {
+void timer_loop(net::system_timer *timer, const asio::error_code &) {
 #ifdef SF_DEBUG
-  BOOST_LOG_TRIVIAL(debug) << "timer_loop";
+  spdlog::debug("timer_loop");
 #endif
   // Reschedule the timer for 1 second in the future:
   timer->expires_after(std::chrono::seconds(5));
@@ -35,7 +35,7 @@ void timer_loop(net::system_timer *timer, const boost::system::error_code &) {
 // main logic when running in sf mode
 HRESULT sf_main() {
 #ifdef SF_DEBUG
-  BOOST_LOG_TRIVIAL(debug) << "App start.";
+  spdlog::debug("App start.");
 #endif
   winrt::com_ptr<IFabricRuntime> fabric_runtime;
   winrt::com_ptr<IFabricCodePackageActivationContext> activation_context;
@@ -44,8 +44,8 @@ HRESULT sf_main() {
       ::FabricCreateRuntime(IID_IFabricRuntime, (void **)fabric_runtime.put());
   if (hr != NO_ERROR) {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "FabricCreateRuntime failed: " << hr << " "
-                             << sf::get_fabric_error_str(hr);
+    spdlog::error("FabricCreateRuntime failed: {} {}", hr,
+                  sf::get_fabric_error_str(hr));
 #endif
     return hr;
   }
@@ -54,7 +54,7 @@ HRESULT sf_main() {
                                     (void **)activation_context.put());
   if (hr != NO_ERROR) {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "FabricCreateRuntime failed: " << hr;
+    spdlog::error("FabricCreateRuntime failed: {}", hr);
 #endif
     return hr;
   }
@@ -63,7 +63,7 @@ HRESULT sf_main() {
   hr = sf::get_hostname(hostname);
   if (hr != NO_ERROR) {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "get_hostname failed: " << hr;
+    spdlog::error("get_hostname failed: {}", hr);
 #endif
   }
 
@@ -79,7 +79,7 @@ HRESULT sf_main() {
 
   if (hr != NO_ERROR) {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "RegisterStatefulServiceFactory failed: " << hr;
+    spdlog::error("RegisterStatefulServiceFactory failed: {}", hr);
 #endif
     return hr;
   }
@@ -104,7 +104,7 @@ local_main(winrt::com_ptr<IFabricStatefulServiceFactory> &service_factory_com,
                                           nullptr, id, rid, replica.put());
   if (hr != S_OK) {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "CreateReplica failed: " << hr;
+    spdlog::error("CreateReplica failed: {}", hr);
 #endif
     return hr;
   }
@@ -157,11 +157,11 @@ int main(int argc, char *argv[]) {
 
   // currently the main thread is not tied with the app and is doing nothing.
   net::system_timer timer(io_ctx);
-  boost::system::error_code ec;
+  asio::error_code ec;
   net::signal_set signals(io_ctx, SIGINT, SIGTERM);
   signals.async_wait([&io_ctx](auto, auto) {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(error) << "Main thread termination signal";
+    spdlog::error("Main thread termination signal");
 #endif
     io_ctx.stop();
   });

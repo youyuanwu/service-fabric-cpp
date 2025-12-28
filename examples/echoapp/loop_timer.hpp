@@ -5,16 +5,16 @@
 // ------------------------------------------------------------
 
 #pragma once
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #include <chrono>
 #include <spdlog/spdlog.h>
 
 // Implement a timer to run on io ctx on main thread.
 // This is a hack to keep the main thread alive.
 
-namespace net = boost::asio;
+namespace net = asio;
 
-void timer_loop(net::system_timer *timer, const boost::system::error_code &) {
+void timer_loop(net::system_timer *timer, const asio::error_code &) {
   spdlog::debug("timer_loop");
 
   // Reschedule the timer for 1 second in the future:

@@ -8,10 +8,10 @@
 
 namespace servicefabric {
 
-namespace net = boost::asio;
+namespace net = asio;
 namespace sf = servicefabric;
 
-boost::asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetNodeListExample(
+asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetNodeListExample(
     const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
     IFabricGetNodeListResult **result) {
   assert(queryDescription != nullptr);
@@ -39,7 +39,7 @@ boost::asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetNodeListExample(
   co_return S_OK;
 }
 
-boost::asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetNodeList(
+asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetNodeList(
     const FABRIC_NODE_QUERY_DESCRIPTION *queryDescription,
     IFabricGetNodeListResult **ret) {
   return sf::async_operation(
@@ -47,8 +47,7 @@ boost::asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetNodeList(
       &IFabricQueryClient::EndGetNodeList, ret, queryDescription);
 }
 
-boost::asio::awaitable<HRESULT>
-AwaitableFabricQueryClient::GetApplicationTypeList(
+asio::awaitable<HRESULT> AwaitableFabricQueryClient::GetApplicationTypeList(
     const FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION *queryDescription,
     IFabricGetApplicationTypeListResult **ret) {
   return sf::async_operation(
@@ -56,7 +55,7 @@ AwaitableFabricQueryClient::GetApplicationTypeList(
       &IFabricQueryClient::EndGetApplicationTypeList, ret, queryDescription);
 }
 
-boost::asio::awaitable<HRESULT> AwaitableFabricHealthClient::GetClusterHealth(
+asio::awaitable<HRESULT> AwaitableFabricHealthClient::GetClusterHealth(
     const FABRIC_CLUSTER_HEALTH_POLICY *queryDescription,
     IFabricClusterHealthResult **ret) {
   return sf::async_operation(
@@ -64,7 +63,7 @@ boost::asio::awaitable<HRESULT> AwaitableFabricHealthClient::GetClusterHealth(
       &IFabricHealthClient::EndGetClusterHealth, ret, queryDescription);
 }
 
-boost::asio::awaitable<HRESULT> AwaitableFabricHealthClient::GetNodeHealth(
+asio::awaitable<HRESULT> AwaitableFabricHealthClient::GetNodeHealth(
     LPCWSTR nodeName, const FABRIC_CLUSTER_HEALTH_POLICY *queryDescription,
     IFabricNodeHealthResult **ret) {
   return sf::async_operation(

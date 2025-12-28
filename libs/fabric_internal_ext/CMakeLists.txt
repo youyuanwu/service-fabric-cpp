@@ -12,7 +12,7 @@ target_include_directories(${_lib_name}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 target_link_libraries(${_lib_name}
-  INTERFACE Boost::disable_autolinking Boost::headers
+  INTERFACE asio::asio
   PUBLIC    fabric_internal_sdk 
   PRIVATE   fabric_ext # for async_contxt
 )

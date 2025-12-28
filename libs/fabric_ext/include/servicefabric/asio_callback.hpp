@@ -7,12 +7,9 @@
 #pragma once
 
 #include "FabricCommon.h"
-#include <boost/asio/windows/object_handle.hpp>
-#include <boost/asio/windows/overlapped_ptr.hpp>
-
-// #include <boost/asio/awaitable.hpp>
-#include <boost/asio/use_awaitable.hpp>
-
+#include <asio/use_awaitable.hpp>
+#include <asio/windows/object_handle.hpp>
+#include <asio/windows/overlapped_ptr.hpp>
 #include <winrt/base.h>
 
 #include <functional>
@@ -27,19 +24,18 @@ public:
   callback_obj(std::function<void(IFabricAsyncOperationContext *)> token,
                Executor ex)
       : optr_(), ctx_(nullptr), token_(token) {
-    optr_.reset(ex,
-                [this]([[maybe_unused]] boost::system::error_code ec, size_t) {
-                  // invoke the callback.
-                  BOOST_ASSERT(!ec.failed());
-                  token_(ctx_);
-                });
+    optr_.reset(ex, [this]([[maybe_unused]] asio::error_code ec, size_t) {
+      // invoke the callback.
+      ASIO_ASSERT(!ec);
+      token_(ctx_);
+    });
   }
 
   void complete() {
-    BOOST_ASSERT(token_ != nullptr);
+    ASIO_ASSERT(token_ != nullptr);
     // BOOST_ASSERT(optr.)
-    BOOST_ASSERT(ctx_ != nullptr);
-    boost::system::error_code ec;
+    ASIO_ASSERT(ctx_ != nullptr);
+    asio::error_code ec;
     optr_.complete(ec, 0);
   }
 
@@ -47,7 +43,7 @@ public:
   void set_ctx(IFabricAsyncOperationContext *context) { ctx_ = context; }
 
 private:
-  boost::asio::windows::overlapped_ptr optr_;
+  asio::windows::overlapped_ptr optr_;
   std::function<void(IFabricAsyncOperationContext *)> token_;
   IFabricAsyncOperationContext *ctx_;
 };
@@ -75,7 +71,7 @@ MIDL_INTERFACE("2ebd9df8-f94b-4ab5-bfd4-13af87298f3d")
 IAwaitableCallback : public IFabricAsyncOperationCallback {
 public:
   // for co_await
-  virtual boost::asio::awaitable<void> await() = 0;
+  virtual asio::awaitable<void> await() = 0;
 };
 
 class AsioAwaitableCallback
@@ -100,14 +96,14 @@ public:
     assert(ok);
   }
 
-  boost::asio::awaitable<void> await() override {
+  asio::awaitable<void> await() override {
     assert(oh_.is_open());
-    return oh_.async_wait(boost::asio::use_awaitable);
+    return oh_.async_wait(asio::use_awaitable);
   }
 
 private:
-  // boost::asio::windows::overlapped_ptr optr_;
-  boost::asio::windows::object_handle oh_;
+  // asio::windows::overlapped_ptr optr_;
+  asio::windows::object_handle oh_;
 };
 
 } // namespace servicefabric

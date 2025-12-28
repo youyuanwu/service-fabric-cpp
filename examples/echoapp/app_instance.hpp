@@ -12,7 +12,7 @@
 
 #include "echo_server.hpp"
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -42,7 +42,7 @@ public:
 
 private:
   std::unique_ptr<server> server_;
-  boost::asio::io_context io_context_;
+  asio::io_context io_context_;
   ULONG port_;
   std::wstring hostname_;
   // background threads for server;

@@ -12,7 +12,7 @@
 #include <servicefabric/fabric_error.hpp>
 
 namespace sf = servicefabric;
-namespace net = boost::asio;
+namespace net = asio;
 
 int main() {
 
@@ -29,7 +29,7 @@ int main() {
   spdlog::debug("FabricCreateLocalClient success");
 
   // try use asio ptr
-  boost::system::error_code ec;
+  asio::error_code ec;
   net::io_context io_context;
 
   auto lamda_callback = [client](IFabricAsyncOperationContext *ctx) {

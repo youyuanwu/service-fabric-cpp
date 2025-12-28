@@ -9,7 +9,7 @@ target_include_directories(fabric_ext
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 target_link_libraries(fabric_ext
-  INTERFACE Boost::disable_autolinking Boost::headers
+  INTERFACE asio::asio
   PUBLIC fabric_sdk
   PRIVATE spdlog::spdlog
 )

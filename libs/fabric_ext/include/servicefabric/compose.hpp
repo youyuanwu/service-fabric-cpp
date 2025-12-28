@@ -24,22 +24,20 @@ public:
   // Query is the type input to Begin func
   // token result is the type input to End func
   template <typename Query, typename Result>
-  void
-  async_exec(Query *q,
-             std::function<void(boost::system::error_code, Result *)> token) {
-    BOOST_ASSERT(bf_ != nullptr);
-    BOOST_ASSERT(ef_ != nullptr);
-    BOOST_ASSERT(client_.get() != nullptr);
+  void async_exec(Query *q,
+                  std::function<void(asio::error_code, Result *)> token) {
+    ASIO_ASSERT(bf_ != nullptr);
+    ASIO_ASSERT(ef_ != nullptr);
+    ASIO_ASSERT(client_.get() != nullptr);
 
     // construct callback
     auto lamda_callback = [this, token](IFabricAsyncOperationContext *ctx) {
-      boost::system::error_code ec;
+      asio::error_code ec;
       winrt::com_ptr<Result> result;
       // invoke end func
       HRESULT hr = (client_.get()->*ef_)(ctx, result.put());
       if (hr != NO_ERROR) {
-        ec = boost::system::error_code(
-            hr, boost::asio::error::get_system_category());
+        ec = asio::error_code(hr, asio::error::get_system_category());
         spdlog::debug("EndOperation failed: {}", ec.message());
       }
       token(ec, result.get());
@@ -49,11 +47,10 @@ public:
     // invoke begin func
     HRESULT hr = (client_.get()->*bf_)(q, 1000, callback_.get(), ctx_.put());
     if (hr != NO_ERROR) {
-      auto ec = boost::system::error_code(
-          hr, boost::asio::error::get_system_category());
+      auto ec = asio::error_code(hr, asio::error::get_system_category());
       spdlog::debug("BeginOperation failed: {}", ec.message());
       // begin failed we need to clean the asio callback?
-      BOOST_ASSERT(false);
+      ASIO_ASSERT(false);
     }
   }
 

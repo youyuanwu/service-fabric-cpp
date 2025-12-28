@@ -26,10 +26,6 @@ project(service-fabric LANGUAGES C CXX)
 
 message(STATUS "vcpkg installed dir: ${VCPKG_INSTALLED_DIR}")
 
-# hack
-set(Boost_NO_WARN_NEW_VERSIONS 1)
-set(Boost_USE_STATIC_RUNTIME OFF)
-
 option(service_fabric_BuildTests     "Build the unit tests when BUILD_TESTING is enabled." ${service_fabric_MAIN_PROJECT})
 option(service_fabric_BuildExamples  "Build examples"                                      ${service_fabric_MAIN_PROJECT})
 option(service_fabric_BuildIDLOnly   "Build IDL and fabric libs only"                                                 OFF)
@@ -56,6 +52,7 @@ endif()
 
 find_package(argparse CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(asio CONFIG REQUIRED)
 
 add_subdirectory(libs)
 

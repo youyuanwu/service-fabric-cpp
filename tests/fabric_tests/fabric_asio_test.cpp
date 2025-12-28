@@ -12,8 +12,8 @@
 #include "servicefabric/fabric_client.hpp"
 #include "servicefabric/fabric_error.hpp"
 
-#include <boost/asio/co_spawn.hpp>
-#include <boost/asio/detached.hpp>
+#include <asio/co_spawn.hpp>
+#include <asio/detached.hpp>
 #include <latch>
 #include <spdlog/spdlog.h>
 
@@ -32,7 +32,7 @@
 #include <any>
 
 namespace sf = servicefabric;
-namespace net = boost::asio;
+namespace net = asio;
 
 class myctx : public winrt::implements<myctx, IFabricAsyncOperationContext> {
 public:
@@ -69,14 +69,13 @@ public:
   appInstanceImpl(net::io_context &io_context) : io_context_(io_context) {}
 
   // coro backend api impl
-  boost::asio::awaitable<HRESULT>
-  Open(IFabricStatelessServicePartition *partition,
-       IFabricStringResult **serviceAddress) {
+  asio::awaitable<HRESULT> Open(IFabricStatelessServicePartition *partition,
+                                IFabricStringResult **serviceAddress) {
     UNREFERENCED_PARAMETER(partition);
     *serviceAddress = winrt::make<sf::string_result>(L"myaddress").detach();
     co_return S_OK;
   }
-  boost::asio::awaitable<HRESULT> Close() { co_return S_OK; }
+  asio::awaitable<HRESULT> Close() { co_return S_OK; }
 
   // callback backend api impl
   // token type void(ec, std::string reply)
@@ -197,17 +196,18 @@ public:
     ctx.get()->AddRef();
     *context = ctx.get();
 
-    impl_.ProcessMessage(
-        data, [ctx, cb](boost::system::error_code ec, std::string reply) {
-          // TODO : pass on ec. But in this example ec is not used.
-          UNREFERENCED_PARAMETER(ec);
+    impl_.ProcessMessage(data,
+                         [ctx, cb](asio::error_code ec, std::string reply) {
+                           // TODO : pass on ec. But in this example ec is not
+                           // used.
+                           UNREFERENCED_PARAMETER(ec);
 
-          std::any a = std::move(reply);
-          auto cctx = dynamic_cast<myctx *>(ctx.get());
-          assert(cctx != nullptr);
-          cctx->SetAny(std::move(a));
-          cb->Invoke(cctx);
-        });
+                           std::any a = std::move(reply);
+                           auto cctx = dynamic_cast<myctx *>(ctx.get());
+                           assert(cctx != nullptr);
+                           cctx->SetAny(std::move(a));
+                           cb->Invoke(cctx);
+                         });
     return S_OK;
   }
 
@@ -242,7 +242,7 @@ boost::ut::suite errors = [] {
       expect(hr == S_OK >> fatal);
 
       // try use asio ptr
-      boost::system::error_code ec;
+      asio::error_code ec;
       net::io_context io_context;
 
       auto lamda_callback = [client](IFabricAsyncOperationContext *ctx) {
@@ -316,7 +316,7 @@ boost::ut::suite errors = [] {
       expect(hr == S_OK);
 
       // try use asio ptr
-      boost::system::error_code ec;
+      asio::error_code ec;
       net::io_context io_context;
 
       sf::AwaitableFabricQueryClient fc(client);

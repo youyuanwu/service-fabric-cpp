@@ -17,7 +17,7 @@
 #include <thread>
 
 namespace sf = servicefabric;
-namespace net = boost::asio;
+namespace net = asio;
 
 int main() {
 
@@ -35,7 +35,7 @@ int main() {
   spdlog::info("FabricCreateLocalClient success");
 
   // try use asio ptr
-  boost::system::error_code ec;
+  asio::error_code ec;
   net::io_context io_context;
 
   // node request
@@ -44,8 +44,8 @@ int main() {
                     &IFabricQueryClient::EndGetNodeList);
 
   FABRIC_NODE_QUERY_DESCRIPTION node_query = {};
-  std::function<void(boost::system::error_code, IFabricGetNodeListResult *)>
-      node_callback = [](boost::system::error_code ec,
+  std::function<void(asio::error_code, IFabricGetNodeListResult *)>
+      node_callback = [](asio::error_code ec,
                          IFabricGetNodeListResult *result) {
         spdlog::info("node_callback {}", ec.message());
         if (ec) {
@@ -74,22 +74,22 @@ int main() {
                      &IFabricQueryClient::EndGetApplicationTypeList);
 
   FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION app_query = {};
-  std::function<void(boost::system::error_code ec,
+  std::function<void(asio::error_code ec,
                      IFabricGetApplicationTypeListResult * result)>
-      app_callback = [](boost::system::error_code ec,
-                        IFabricGetApplicationTypeListResult *result) {
-        spdlog::info("app_callback {}", ec.message());
-        if (ec) {
-          return;
-        }
-        auto list = result->get_ApplicationTypeList();
-        auto list_count = list->Count;
-        auto list_items = list->Items;
-        for (std::size_t i = 0; i < list_count; i++) {
-          auto item = list_items + i;
-          spdlog::info(L"apptype name: {}", item->ApplicationTypeName);
-        }
-      };
+      app_callback =
+          [](asio::error_code ec, IFabricGetApplicationTypeListResult *result) {
+            spdlog::info("app_callback {}", ec.message());
+            if (ec) {
+              return;
+            }
+            auto list = result->get_ApplicationTypeList();
+            auto list_count = list->Count;
+            auto list_items = list->Items;
+            for (std::size_t i = 0; i < list_count; i++) {
+              auto item = list_items + i;
+              spdlog::info(L"apptype name: {}", item->ApplicationTypeName);
+            }
+          };
   op2.async_exec(&app_query, app_callback);
 
   io_context.run();

@@ -16,7 +16,7 @@ void STDMETHODCALLTYPE transport_message::GetHeaderAndBodyBuffer(
     /* [out] */ ULONG *msgBufferCount,
     /* [out] */ const FABRIC_TRANSPORT_MESSAGE_BUFFER **MsgBuffers) {
 #ifdef SF_DEBUG
-  BOOST_LOG_TRIVIAL(debug) << "message::GetHeaderAndBodyBuffer";
+  spdlog::debug("message::GetHeaderAndBodyBuffer");
 #endif
   // todo: return only parts that has the pointers.
   if (headerBuffer == nullptr || msgBufferCount == nullptr ||
@@ -36,7 +36,7 @@ void STDMETHODCALLTYPE transport_message::GetHeaderAndBodyBuffer(
 
 void STDMETHODCALLTYPE transport_message::Dispose(void) {
 #ifdef SF_DEBUG
-  BOOST_LOG_TRIVIAL(debug) << "message::Dispose";
+  spdlog::debug("message::Dispose");
 #endif
 }
 

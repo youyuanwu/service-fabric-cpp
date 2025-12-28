@@ -15,9 +15,7 @@
 #include "servicefabric/transport_message.hpp"
 #include "servicefabric/waitable_callback.hpp"
 
-#ifdef SF_DEBUG
-#include "boost/log/trivial.hpp"
-#endif
+#include <spdlog/spdlog.h>
 
 import kvstore;
 
@@ -65,7 +63,7 @@ int main() {
       /* [retval][out] */ client.put());
   if (hr != S_OK) {
 #ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "CreateFabricTransportClient failed: " << hr;
+    spdlog::debug("CreateFabricTransportClient failed: {}", hr);
 #endif
     return hr;
   }
@@ -78,7 +76,7 @@ int main() {
     hr = client->BeginOpen(1000, callback.get(), ctx.put());
     if (hr != S_OK) {
 #ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(debug) << "BeginOpen failed: " << hr;
+      spdlog::debug("BeginOpen failed: {}", hr);
 #endif
       return hr;
     }
@@ -86,7 +84,7 @@ int main() {
     hr = client->EndOpen(ctx.get());
     if (hr != S_OK) {
 #ifdef SF_DEBUG
-      BOOST_LOG_TRIVIAL(debug) << "EndOpen failed: " << hr;
+      spdlog::debug("EndOpen failed: {}", hr);
 #endif
       return hr;
     }

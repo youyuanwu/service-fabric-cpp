@@ -10,7 +10,7 @@
 
 #include "loop_timer.hpp"
 #include "service_factory.hpp"
-#include <boost/asio/signal_set.hpp>
+#include <asio/signal_set.hpp>
 
 #include "servicefabric/activation_helpers.hpp"
 #include "servicefabric/waitable_callback.hpp"
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
   // currently the main thread is not tied with the app and is doing nothing.
   net::system_timer timer(io_ctx);
-  boost::system::error_code ec;
+  asio::error_code ec;
   net::signal_set signals(io_ctx, SIGINT, SIGTERM);
   signals.async_wait([&io_ctx](auto, auto) {
     spdlog::error("Main thread termination signal");
