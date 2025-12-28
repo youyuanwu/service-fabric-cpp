@@ -1,32 +1,29 @@
 #include "servicefabric/fabric_error.hpp"
-#include <boost/program_options.hpp>
+#include <argparse/argparse.hpp>
 #include <iostream>
 #include <string>
 
 namespace sf = servicefabric;
 
-namespace po = boost::program_options;
-
 int main(int argc, char **argv) {
   std::int64_t input = {};
   std::string hex = {};
   try {
+    argparse::ArgumentParser program("feparse");
 
-    po::options_description desc("Allowed options");
-    desc.add_options()("help", "produce help message")(
-        "hr", po::value(&input)->default_value(S_OK), "error code value")(
-        "hex", po::value(&hex)->default_value("0x0"), "error code hex");
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
+    program.add_argument("--hr")
+        .default_value(static_cast<std::int64_t>(S_OK))
+        .scan<'i', std::int64_t>()
+        .help("error code value");
 
-    if (vm.count("help")) {
-      std::stringstream ss;
-      ss << std::endl;
-      desc.print(ss);
-      std::cerr << ss.str();
-      return EXIT_FAILURE;
-    }
+    program.add_argument("--hex")
+        .default_value(std::string("0x0"))
+        .help("error code hex");
+
+    program.parse_args(argc, argv);
+
+    input = program.get<std::int64_t>("--hr");
+    hex = program.get<std::string>("--hex");
     // example hr value: -2147017793;
     HRESULT hr = static_cast<HRESULT>(input);
     if (hr == 0) {
@@ -34,9 +31,9 @@ int main(int argc, char **argv) {
       hr = static_cast<HRESULT>(std::stoll(hex, nullptr, 16)); // hex base
     }
     std::string str = sf::get_fabric_error_str(hr);
-    std::cout << "FabricError: " << str;
+    std::cout << "FabricError: " << str << std::endl;
   } catch (const std::exception &e) {
-    std::cerr << "Exception: " << e.what();
+    std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

@@ -5,8 +5,8 @@
   "dependencies": [
     "boost-asio",
     "boost-log",
-    "boost-program-options",
     "magic-enum",
-    "bext-ut"
+    "bext-ut",
+    "argparse"
   ]
 }

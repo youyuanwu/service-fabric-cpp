@@ -5,7 +5,6 @@
 // ------------------------------------------------------------
 
 #include "FabricClient.h"
-#include <boost/log/trivial.hpp>
 
 #include <iostream>
 #include <string>
@@ -13,11 +12,10 @@
 #include "servicefabric/fabric_error.hpp"
 #include <servicefabric/waitable_callback.hpp>
 
-#include <boost/program_options.hpp>
+#include <argparse/argparse.hpp>
 #include <thread>
 
 namespace sf = servicefabric;
-namespace po = boost::program_options;
 
 enum class PPType {
   BINARY, // 0
@@ -33,25 +31,22 @@ int main(int argc, char **argv) {
 
   // parse args
   try {
+    argparse::ArgumentParser program("property_main");
 
-    po::options_description desc("Allowed options");
-    desc.add_options()("help", "produce help message")(
-        "uri", po::value(&uri)->required(),
-        "uri")("name", po::value(&name)->required(),
-               "name")("type", po::value(&type)->default_value(0), "type");
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
+    program.add_argument("--uri").required().help("uri");
 
-    if (vm.count("help")) {
-      std::stringstream ss;
-      ss << std::endl;
-      desc.print(ss);
-      std::cerr << ss.str();
-      return EXIT_FAILURE;
-    }
+    program.add_argument("--name").required().help("name");
+
+    program.add_argument("--type").default_value(0).scan<'i', int>().help(
+        "type");
+
+    program.parse_args(argc, argv);
+
+    uri = program.get<std::string>("--uri");
+    name = program.get<std::string>("--name");
+    type = program.get<int>("--type");
   } catch (const std::exception &e) {
-    std::cerr << "Exception: " << e.what();
+    std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -80,6 +75,8 @@ int main(int argc, char **argv) {
 
   winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
+  std::cout << "Calling BeginGetProperty with " << uri << " and " << name
+            << std::endl;
   hr = client->BeginGetProperty(w_uri.c_str(), w_name.c_str(), 1000,
                                 callback.get(), ctx.put());
   if (hr != NO_ERROR) {

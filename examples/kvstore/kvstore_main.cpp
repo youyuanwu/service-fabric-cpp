@@ -15,13 +15,12 @@
 #include <servicefabric/activation_helpers.hpp>
 #include <servicefabric/fabric_error.hpp>
 
-#include <boost/program_options.hpp>
+#include <argparse/argparse.hpp>
 
 import kvstore;
 
 namespace net = boost::asio;
 namespace sf = servicefabric;
-namespace po = boost::program_options;
 
 void timer_loop(net::system_timer *timer, const boost::system::error_code &) {
 #ifdef SF_DEBUG
@@ -123,19 +122,20 @@ struct kv_options {
 int main(int argc, char *argv[]) {
 
   kv_options options;
-  po::options_description desc("Allowed options");
-  desc.add_options()("help", "produce help message")(
-      "local", po::value(&options.local)->default_value(false),
-      "local run outside sf. Not working yet.");
 
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);
+  try {
+    argparse::ArgumentParser program("kvstore");
 
-  if (vm.count("help")) {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(info) << desc;
-#endif
+    program.add_argument("--local")
+        .default_value(false)
+        .implicit_value(true)
+        .help("local run outside sf. Not working yet.");
+
+    program.parse_args(argc, argv);
+
+    options.local = program.get<bool>("--local");
+  } catch (const std::exception &e) {
+    std::cerr << "Exception: " << e.what() << std::endl;
     return 1;
   }
 

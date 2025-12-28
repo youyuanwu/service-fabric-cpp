@@ -1,8 +1,5 @@
 set (CMAKE_CXX_STANDARD 20)
 
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED COMPONENTS program_options)
-
 
 add_library(kvstore_lib)
 target_sources(kvstore_lib PRIVATE FILE_SET cxx_modules TYPE CXX_MODULES FILES 
@@ -17,12 +14,13 @@ target_link_libraries(kvstore_lib
     PUBLIC fabric_error
     PUBLIC FabricRuntime
     PUBLIC FabricTransport
-    PUBLIC Boost::program_options
 )
 
 set(_exe_name kvstore)
 add_executable(${_exe_name} kvstore_main.cpp)
-target_link_libraries(${_exe_name} PRIVATE kvstore_lib)
+target_link_libraries(${_exe_name} 
+    PRIVATE kvstore_lib argparse::argparse
+)
 
 set(_pkg_root ${CMAKE_BINARY_DIR}/kvstore_root)
 

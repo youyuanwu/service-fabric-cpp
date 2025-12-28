@@ -54,6 +54,7 @@ if(NOT fabric_metadata_POPULATED)
     add_subdirectory(${fabric_metadata_SOURCE_DIR} ${fabric_metadata_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+find_package(argparse CONFIG REQUIRED)
 
 add_subdirectory(libs)
 
