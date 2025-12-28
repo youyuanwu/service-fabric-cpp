@@ -23,7 +23,8 @@ module;
 
 export module kvstore;
 
-import kvtransport;
+export import :curd;
+export import :transport;
 
 namespace sf = servicefabric;
 

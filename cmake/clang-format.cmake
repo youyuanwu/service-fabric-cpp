@@ -2,16 +2,16 @@
 file(GLOB_RECURSE ALL_SOURCE_FILES 
     examples/*.cpp
     examples/*.hpp
-    examples/*.ixx
+    examples/*.cppm
     include/*.cpp
     include/*.hpp
     tests/*.cpp
     tests/*.hpp
-    tests/*.ixx
+    tests/*.cppm
     libs/*.cpp
     libs/*.hpp
     libs/*.h
-    libs/*.ixx
+    libs/*.cppm
     src/*.cpp
     src/*.hpp
 )

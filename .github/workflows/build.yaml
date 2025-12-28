@@ -18,8 +18,8 @@ jobs:
         & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
       shell: pwsh
 
-    - name: Get specific version CMake, v3.28.3
-      uses: lukka/get-cmake@v3.28.3
+    - name: Check cmake version
+      run: cmake --version
     
     - name: Setup vcpkg (it does not install any package yet)
       uses: lukka/run-vcpkg@v11

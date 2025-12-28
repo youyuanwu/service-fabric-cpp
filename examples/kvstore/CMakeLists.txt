@@ -4,10 +4,11 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED COMPONENTS program_options)
 
 
-add_library(kvstore_lib
-    kvstore.ixx
-    kvcurd.ixx
-    kvtransport.ixx
+add_library(kvstore_lib)
+target_sources(kvstore_lib PRIVATE FILE_SET cxx_modules TYPE CXX_MODULES FILES 
+    kvstore.cppm
+    kvstore-curd.cppm
+    kvstore-transport.cppm
 )
 
 target_link_libraries(kvstore_lib 

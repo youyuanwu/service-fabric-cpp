@@ -14,7 +14,7 @@ module;
 
 #include <servicefabric/waitable_callback.hpp>
 
-export module kvcurd;
+export module kvstore:curd;
 
 namespace sf = servicefabric;
 

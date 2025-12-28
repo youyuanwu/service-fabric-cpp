@@ -19,7 +19,7 @@
 #include "boost/log/trivial.hpp"
 #endif
 
-import kvtransport;
+import kvstore;
 
 namespace sf = servicefabric;
 
