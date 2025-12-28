@@ -23,12 +23,12 @@ namespace net = boost::asio;
 namespace sf = servicefabric;
 namespace po = boost::program_options;
 
-void timer_loop(net::deadline_timer *timer, const boost::system::error_code &) {
+void timer_loop(net::system_timer *timer, const boost::system::error_code &) {
 #ifdef SF_DEBUG
   BOOST_LOG_TRIVIAL(debug) << "timer_loop";
 #endif
   // Reschedule the timer for 1 second in the future:
-  timer->expires_from_now(boost::posix_time::seconds(15));
+  timer->expires_after(std::chrono::seconds(5));
   // Posts the timer event
   timer->async_wait(std::bind(timer_loop, timer, std::placeholders::_1));
 }
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
   }
 
   // currently the main thread is not tied with the app and is doing nothing.
-  net::deadline_timer timer(io_ctx);
+  net::system_timer timer(io_ctx);
   boost::system::error_code ec;
   net::signal_set signals(io_ctx, SIGINT, SIGTERM);
   signals.async_wait([&io_ctx](auto, auto) {

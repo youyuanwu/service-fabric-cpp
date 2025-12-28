@@ -270,7 +270,9 @@ public:                                                                        \
   } else
 
 #define END_COM_INTERFACE_LIST()                                               \
-  { *result = NULL; }                                                          \
+  {                                                                            \
+    *result = NULL;                                                            \
+  }                                                                            \
                                                                                \
   if (*result) {                                                               \
     BaseAddRef();                                                              \

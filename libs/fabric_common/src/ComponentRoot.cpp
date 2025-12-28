@@ -6,6 +6,7 @@
 
 #include "ComponentRoot.h"
 #include "stdafx.h"
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <stacktrace>

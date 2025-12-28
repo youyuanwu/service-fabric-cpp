@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
   }
 
   // currently the main thread is not tied with the app and is doing nothing.
-  net::deadline_timer timer(io_ctx);
+  net::system_timer timer(io_ctx);
   boost::system::error_code ec;
   net::signal_set signals(io_ctx, SIGINT, SIGTERM);
   signals.async_wait([&io_ctx](auto, auto) {

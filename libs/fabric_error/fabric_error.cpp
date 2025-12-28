@@ -10,7 +10,7 @@
 
 #define MAGIC_ENUM_RANGE_MIN 0x80071bbc
 #define MAGIC_ENUM_RANGE_MAX 0x80071d4b
-#include "magic_enum.hpp"
+#include "magic_enum/magic_enum.hpp"
 
 namespace servicefabric {
 

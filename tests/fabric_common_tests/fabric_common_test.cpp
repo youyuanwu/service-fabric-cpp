@@ -36,6 +36,7 @@ public:
     std::size_t id = hash(std::this_thread::get_id());
     std::lock_guard<std::mutex> lk(mtx_);
     DBG_UNREFERENCED_LOCAL_VARIABLE(id);
+    DBG_UNREFERENCED_LOCAL_VARIABLE(msg);
     // uncomment for debugging.
     // std::cout << "[" << id << "] " << msg << std::endl;
   }

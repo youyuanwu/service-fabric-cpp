@@ -15,13 +15,12 @@ public:
   AsyncOperationState();
   ~AsyncOperationState();
 
-  __declspec(
-      property(get = get_CompletedSynchronously)) bool CompletedSynchronously;
+  __declspec(property(
+      get = get_CompletedSynchronously)) bool CompletedSynchronously;
   __declspec(property(get = get_IsCompleted)) bool IsCompleted;
   __declspec(property(get = get_InternalIsCompleted)) bool InternalIsCompleted;
-  __declspec(property(
-      get =
-          get_InternalIsCompletingOrCompleted)) bool InternalIsCompletingOrCompleted;
+  __declspec(property(get = get_InternalIsCompletingOrCompleted)) bool
+      InternalIsCompletingOrCompleted;
   __declspec(property(
       get = get_InternalIsCancelRequested)) bool InternalIsCancelRequested;
 

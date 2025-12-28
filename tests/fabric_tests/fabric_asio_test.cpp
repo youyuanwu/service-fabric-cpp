@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 class myctx : public winrt::implements<myctx, IFabricAsyncOperationContext> {
 public:
-  myctx(){};
+  myctx() {};
   void SetAny(std::any &&a) { a_ = std::move(a); }
   std::any &GetAny() { return a_; }
 

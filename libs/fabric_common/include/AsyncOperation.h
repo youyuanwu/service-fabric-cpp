@@ -32,7 +32,7 @@ struct OperationContextBase {
   std::unique_ptr<OperationContextBase> Next;
 
 public:
-  virtual ~OperationContextBase(){};
+  virtual ~OperationContextBase() {};
 
 protected:
   OperationContextBase() : Next(nullptr) {}
@@ -59,8 +59,9 @@ class AsyncOperation : public std::enable_shared_from_this<AsyncOperation> {
 public:
   virtual ~AsyncOperation(void);
 
-  __declspec(property(get = get_AsyncOperationTraceId))
-      std::wstring const &AsyncOperationTraceId;
+  __declspec(property(
+      get =
+          get_AsyncOperationTraceId)) std::wstring const &AsyncOperationTraceId;
 
   // returns the ErrorCode from the result of AsyncOperation
   __declspec(property(get = get_Error)) ErrorCode const &Error;
@@ -68,8 +69,8 @@ public:
   // returns the parent supplied to this AsyncOperation
   __declspec(property(get = get_State)) AsyncOperationSPtr const &Parent;
 
-  __declspec(
-      property(get = get_CompletedSynchronously)) bool CompletedSynchronously;
+  __declspec(property(
+      get = get_CompletedSynchronously)) bool CompletedSynchronously;
   __declspec(property(get = get_IsCompleted)) bool IsCompleted;
   __declspec(property(get = get_IsCancelRequested)) bool IsCancelRequested;
   __declspec(property(get = get_FailedSynchronously)) bool FailedSynchronously;
@@ -288,7 +289,7 @@ public:
   }
 
 protected:
-  void OnStart(AsyncOperationSPtr const &){};
+  void OnStart(AsyncOperationSPtr const &) {};
 
 private:
   TAsyncOperationRoot value_;
