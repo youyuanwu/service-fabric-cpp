@@ -27,11 +27,13 @@ public:
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(clientId);
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
-    FABRIC_MESSAGE_BUFFER *body = message->Get_Body();
 #ifdef SF_DEBUG
+    FABRIC_MESSAGE_BUFFER *body = message->Get_Body();
     BOOST_LOG_TRIVIAL(debug)
         << "notification_handler::BeginProcessRequest: body "
         << std::string(body->Buffer, body->Buffer + body->BufferSize);
+#else
+    UNREFERENCED_PARAMETER(message);
 #endif
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         winrt::make<sf::async_context>(callback);

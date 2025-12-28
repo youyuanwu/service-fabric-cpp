@@ -25,7 +25,10 @@ public:
     BOOST_LOG_TRIVIAL(debug)
         << "conn_event_handler::OnConnected connectionAddress: "
         << connectionAddress;
+#else
+    UNREFERENCED_PARAMETER(connectionAddress);
 #endif
+
     return S_OK;
   }
 
@@ -36,7 +39,11 @@ public:
     BOOST_LOG_TRIVIAL(debug)
         << "conn_event_handler::OnDisconnected connectionAddress: "
         << connectionAddress << " error: " << error;
+#else
+    UNREFERENCED_PARAMETER(connectionAddress);
+    UNREFERENCED_PARAMETER(error);
 #endif
+
     return S_OK;
   }
 };

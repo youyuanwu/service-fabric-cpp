@@ -4,32 +4,32 @@
 // license information.
 // ------------------------------------------------------------
 
-#define BOOST_TEST_MODULE fabric_tests
-
 #include <boost/log/trivial.hpp>
 
-#include <boost/test/unit_test.hpp>
+#include <boost/ut.hpp>
 
 #include "FabricTypes.h"
 #include "servicefabric/fabric_error.hpp"
 
 namespace sf = servicefabric;
 
-BOOST_AUTO_TEST_SUITE(test_fabric_error)
+boost::ut::suite errors = [] {
+  using namespace boost::ut;
 
-BOOST_AUTO_TEST_CASE(test_fabric_error_in_range) {
-  BOOST_CHECK_EQUAL("FABRIC_E_INVALID_ADDRESS",
-                    sf::get_fabric_error_str(FABRIC_E_INVALID_ADDRESS));
-  BOOST_CHECK_EQUAL("FABRIC_E_ENDPOINT_NOT_REFERENCED",
-                    sf::get_fabric_error_str(FABRIC_E_ENDPOINT_NOT_REFERENCED));
-}
+  "test_fabric_error_in_range"_test = [] {
+    expect(sf::get_fabric_error_str(FABRIC_E_INVALID_ADDRESS) ==
+           "FABRIC_E_INVALID_ADDRESS");
+    expect(sf::get_fabric_error_str(FABRIC_E_ENDPOINT_NOT_REFERENCED) ==
+           "FABRIC_E_ENDPOINT_NOT_REFERENCED");
+  };
 
-BOOST_AUTO_TEST_CASE(test_fabric_error_out_of_range) {
-  BOOST_CHECK_EQUAL("Invalid pointer", sf::get_fabric_error_str(E_POINTER));
-  BOOST_CHECK_EQUAL("The parameter is incorrect.",
-                    sf::get_fabric_error_str(E_INVALIDARG));
-  BOOST_CHECK_EQUAL("The operation completed successfully.",
-                    sf::get_fabric_error_str(S_OK));
-}
+  "test_fabric_error_out_of_range"_test = [] {
+    expect(sf::get_fabric_error_str(E_POINTER) == "Invalid pointer");
+    expect(sf::get_fabric_error_str(E_INVALIDARG) ==
+           "The parameter is incorrect.");
+    expect(sf::get_fabric_error_str(S_OK) ==
+           "The operation completed successfully.");
+  };
+};
 
-BOOST_AUTO_TEST_SUITE_END()
+int main() {}

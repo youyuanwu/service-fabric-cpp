@@ -1,15 +1,11 @@
 set (CMAKE_CXX_STANDARD 20)
 
-# setup boost
-set(Boost_USE_STATIC_LIBS ON) # use static boost
-find_package(Boost REQUIRED COMPONENTS unit_test_framework ) # log is used for tests
-
 set(_test_name service_communication_test)
 
 add_executable(${_test_name} ${_test_name}.cpp)
 
 target_link_libraries(${_test_name}
-    PUBLIC Boost::unit_test_framework Boost::disable_autolinking
+    PUBLIC Boost::log
     FabricServiceCommunication
     fabric_error
     fabric_ext
@@ -18,7 +14,7 @@ target_link_libraries(${_test_name}
 
 target_compile_definitions(${_test_name}
   PUBLIC WIN32_LEAN_AND_MEAN # This is to get rid of include from fabric of winsock.h
-  PUBLIC SF_DEBUG=1
+  # PUBLIC SF_DEBUG=1 # causing deadlock?
 )
 
 target_include_directories(${_test_name}

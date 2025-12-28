@@ -8,6 +8,7 @@
 
 #include "fabricservicecommunication_.h"
 #include "servicefabric/async_context.hpp"
+#include <boost/log/trivial.hpp>
 #include <winrt/base.h>
 
 namespace sf = servicefabric;

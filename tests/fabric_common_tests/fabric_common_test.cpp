@@ -11,7 +11,7 @@
 // license information.
 // ------------------------------------------------------------
 
-#define BOOST_TEST_MODULE fabric_common_test
+#include <boost/ut.hpp>
 
 #include "AsyncOperation.h"
 #include "ComAsyncOperationContext.h"
@@ -22,12 +22,10 @@
 #include "RootedObject.h"
 #include "RootedObjectPointer.h"
 #include "servicefabric/waitable_callback.hpp"
-#include <boost/test/unit_test.hpp>
 #include <iostream>
-#include <winrt/base.h>
-// #include <future>
 #include <latch>
 #include <random>
+#include <winrt/base.h>
 
 class TestLogger {
 public:
@@ -451,9 +449,10 @@ struct BasicScenarioTestHelper {
     ErrorCode errorCode = componentAPtr->EndFooA(fooAOperation);
     // if (CancelScenario == false)
     if (true) {
-      BOOST_REQUIRE(errorCode.IsSuccess());
+      boost::ut::expect(errorCode.IsSuccess());
     } else {
-      BOOST_REQUIRE(errorCode.ReadValue() == ErrorCodeValue::OperationCanceled);
+      boost::ut::expect(errorCode.ReadValue() ==
+                        ErrorCodeValue::OperationCanceled);
       // Trace.WriteInfo(TraceType, "Operation canceled successfully");
     }
 
@@ -640,115 +639,117 @@ ComProxyComponentA::EndFooA(Common::AsyncOperationSPtr const &operation) {
   return ComProxyComponentAAsyncOperation::End(operation);
 }
 
-BOOST_AUTO_TEST_SUITE(test_fabric_common)
+boost::ut::suite errors = [] {
+  using namespace boost::ut;
 
-BOOST_AUTO_TEST_CASE(basic_test) {
-  auto componentA = std::make_shared<ComponentA>();
-  auto componentAPtr = componentA.get();
+  "basic"_test = [] {
+    auto componentA = std::make_shared<ComponentA>();
+    auto componentAPtr = componentA.get();
 
-  std::latch sync(1);
+    std::latch sync(1);
 
-  auto operation = componentA->BeginFooA(
-      [componentAPtr, &sync](AsyncOperationSPtr const &fooAOperation) {
-        GLogger->Write("BeginFooA callback async invoke");
-        if (!fooAOperation->CompletedSynchronously) {
-          ErrorCode errorCode = componentAPtr->EndFooA(fooAOperation);
-          BOOST_REQUIRE(errorCode.IsSuccess());
-          sync.count_down();
-        }
-      },
-      componentA->CreateAsyncOperationRoot());
-  GLogger->Write("ComponentA op started");
-  if (operation->CompletedSynchronously) {
-    GLogger->Write("BeginFooA callback sync invoke");
-    ErrorCode errorCode = componentAPtr->EndFooA(operation);
-    BOOST_REQUIRE(errorCode.IsSuccess());
-    sync.count_down();
-  }
-  sync.wait();
-}
+    auto operation = componentA->BeginFooA(
+        [componentAPtr, &sync](AsyncOperationSPtr const &fooAOperation) {
+          GLogger->Write("BeginFooA callback async invoke");
+          if (!fooAOperation->CompletedSynchronously) {
+            ErrorCode errorCode = componentAPtr->EndFooA(fooAOperation);
+            expect(errorCode.IsSuccess());
+            sync.count_down();
+          }
+        },
+        componentA->CreateAsyncOperationRoot());
+    GLogger->Write("ComponentA op started");
+    if (operation->CompletedSynchronously) {
+      GLogger->Write("BeginFooA callback sync invoke");
+      ErrorCode errorCode = componentAPtr->EndFooA(operation);
+      expect(errorCode.IsSuccess());
+      sync.count_down();
+    }
+    sync.wait();
+  };
 
-BOOST_AUTO_TEST_CASE(basic_com_test) {
-  // make componentA
-  std::shared_ptr<ComponentA> componentA = std::make_shared<ComponentA>();
-  Common::RootedObjectPointer<ComponentA> impl(
-      componentA.get(), componentA->CreateComponentRoot());
-
-  // make com wrapper
-  winrt::com_ptr<IAComponent> ccA = winrt::make<ComAComponent>(impl);
-
-  winrt::com_ptr<servicefabric::IFabricAsyncOperationWaitableCallback>
-      callback =
-          winrt::make<servicefabric::FabricAsyncOperationWaitableCallback>();
-  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
-
-  HRESULT hr = ccA->BeginFooA(callback.get(), ctx.put());
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-  callback->Wait();
-  hr = ccA->EndFooA(ctx.get());
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-}
-
-BOOST_AUTO_TEST_CASE(basic_com_proxy_test) {
-  // create com component
-  // make componentA
-  std::shared_ptr<ComponentA> componentA = std::make_shared<ComponentA>();
-  Common::RootedObjectPointer<ComponentA> impl(
-      componentA.get(), componentA->CreateComponentRoot());
-  // make com wrapper
-  winrt::com_ptr<IAComponent> ccA = winrt::make<ComAComponent>(impl);
-  Common::ComPointer<IAComponent> ccACopy;
-  ccACopy.SetAndAddRef(ccA.get());
-  // create proxy
-  auto proxy = std::make_shared<ComProxyComponentA>(ccACopy);
-  auto proxyPtr = proxy.get();
-  // test the proxy
-  std::latch sync(1);
-
-  auto operation = proxy->BeginFooA(
-      [proxyPtr, &sync](AsyncOperationSPtr const &fooAOperation) {
-        GLogger->Write("BeginFooA callback async invoke");
-        if (!fooAOperation->CompletedSynchronously) {
-          ErrorCode errorCode = proxyPtr->EndFooA(fooAOperation);
-          BOOST_REQUIRE(errorCode.IsSuccess());
-          sync.count_down();
-        }
-      },
-      componentA->CreateAsyncOperationRoot());
-  GLogger->Write("ComponentA op started");
-  if (operation->CompletedSynchronously) {
-    GLogger->Write("BeginFooA callback sync invoke");
-    ErrorCode errorCode = proxyPtr->EndFooA(operation);
-    BOOST_REQUIRE(errorCode.IsSuccess());
-    sync.count_down();
-  }
-  sync.wait();
-}
-
-BOOST_AUTO_TEST_CASE(basic_reference_stack_test) {
-  // make componentA
-  std::shared_ptr<ComponentA> componentA =
-      std::make_shared<ComponentA>(true /*enable reference tracking*/);
-
-  // Each time CreateComponentRoot is called, the stack location is recorded.
-  // This helps to diagnose reference lifetime or leaks of the RootedObject,
-  // tied to the shared_ptr.
-
-  // Windows memory leak checker in debug mode can catch mem leak.
-  // Maybe the RootedObject is a reference framework to track references to the
-  // obj inside shared_ptr. And the framework
-
-  {
+  "basic_com"_test = [] {
+    // make componentA
+    std::shared_ptr<ComponentA> componentA = std::make_shared<ComponentA>();
     Common::RootedObjectPointer<ComponentA> impl(
         componentA.get(), componentA->CreateComponentRoot());
 
-    Common::RootedObjectPointer<ComponentA> impl2(
+    // make com wrapper
+    winrt::com_ptr<IAComponent> ccA = winrt::make<ComAComponent>(impl);
+
+    winrt::com_ptr<servicefabric::IFabricAsyncOperationWaitableCallback>
+        callback =
+            winrt::make<servicefabric::FabricAsyncOperationWaitableCallback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+
+    HRESULT hr = ccA->BeginFooA(callback.get(), ctx.put());
+    expect(hr == S_OK);
+    callback->Wait();
+    hr = ccA->EndFooA(ctx.get());
+    expect(hr == S_OK);
+  };
+
+  "basic_com_proxy"_test = [] {
+    // create com component
+    // make componentA
+    std::shared_ptr<ComponentA> componentA = std::make_shared<ComponentA>();
+    Common::RootedObjectPointer<ComponentA> impl(
         componentA.get(), componentA->CreateComponentRoot());
+    // make com wrapper
+    winrt::com_ptr<IAComponent> ccA = winrt::make<ComAComponent>(impl);
+    Common::ComPointer<IAComponent> ccACopy;
+    ccACopy.SetAndAddRef(ccA.get());
+    // create proxy
+    auto proxy = std::make_shared<ComProxyComponentA>(ccACopy);
+    auto proxyPtr = proxy.get();
+    // test the proxy
+    std::latch sync(1);
 
-    // componentA->WriteDebugReferences(std::cout);
-  }
-  std::cout << "Reference cleared" << std::endl;
-  componentA->WriteDebugReferences(std::cout);
-}
+    auto operation = proxy->BeginFooA(
+        [proxyPtr, &sync](AsyncOperationSPtr const &fooAOperation) {
+          GLogger->Write("BeginFooA callback async invoke");
+          if (!fooAOperation->CompletedSynchronously) {
+            ErrorCode errorCode = proxyPtr->EndFooA(fooAOperation);
+            expect(errorCode.IsSuccess());
+            sync.count_down();
+          }
+        },
+        componentA->CreateAsyncOperationRoot());
+    GLogger->Write("ComponentA op started");
+    if (operation->CompletedSynchronously) {
+      GLogger->Write("BeginFooA callback sync invoke");
+      ErrorCode errorCode = proxyPtr->EndFooA(operation);
+      expect(errorCode.IsSuccess());
+      sync.count_down();
+    }
+    sync.wait();
+  };
 
-BOOST_AUTO_TEST_SUITE_END()
+  "basic_reference_stack"_test = [] {
+    // make componentA
+    std::shared_ptr<ComponentA> componentA =
+        std::make_shared<ComponentA>(true /*enable reference tracking*/);
+
+    // Each time CreateComponentRoot is called, the stack location is recorded.
+    // This helps to diagnose reference lifetime or leaks of the RootedObject,
+    // tied to the shared_ptr.
+
+    // Windows memory leak checker in debug mode can catch mem leak.
+    // Maybe the RootedObject is a reference framework to track references to
+    // the obj inside shared_ptr. And the framework
+
+    {
+      Common::RootedObjectPointer<ComponentA> impl(
+          componentA.get(), componentA->CreateComponentRoot());
+
+      Common::RootedObjectPointer<ComponentA> impl2(
+          componentA.get(), componentA->CreateComponentRoot());
+
+      // componentA->WriteDebugReferences(std::cout);
+    }
+    std::cout << "Reference cleared" << std::endl;
+    componentA->WriteDebugReferences(std::cout);
+  };
+};
+
+int main() {}

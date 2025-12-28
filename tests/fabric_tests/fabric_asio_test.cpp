@@ -3,10 +3,7 @@
 // Licensed under the MIT License (MIT). See License.txt in the repo root for
 // license information.
 // ------------------------------------------------------------
-
-#define BOOST_TEST_MODULE fabric_asio_tests
-
-#include <boost/test/unit_test.hpp>
+#include <boost/ut.hpp>
 
 #include "FabricClient.h"
 #include "FabricTypes.h"
@@ -17,166 +14,7 @@
 
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
-
-namespace sf = servicefabric;
-namespace net = boost::asio;
-
-BOOST_AUTO_TEST_SUITE(test_fabric_asio)
-
-BOOST_AUTO_TEST_CASE(test_asio_callback,
-                     *boost::unit_test_framework::disabled()) {
-  winrt::com_ptr<IFabricQueryClient> client;
-
-  HRESULT hr =
-      ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
-
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-
-  // try use asio ptr
-  boost::system::error_code ec;
-  net::io_context io_context;
-
-  auto lamda_callback = [client](IFabricAsyncOperationContext *ctx) {
-    winrt::com_ptr<IFabricGetNodeListResult> result;
-    HRESULT hr = client->EndGetNodeList(ctx, result.put());
-
-    BOOST_REQUIRE_EQUAL(hr, S_OK);
-
-    const FABRIC_NODE_QUERY_RESULT_LIST *nodes = result->get_NodeList();
-    BOOST_CHECK_NE(nodes, nullptr);
-  };
-
-  winrt::com_ptr<IFabricAsyncOperationCallback> callback =
-      winrt::make<sf::AsioCallback>(lamda_callback, io_context.get_executor());
-
-  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
-  FABRIC_NODE_QUERY_DESCRIPTION node = {};
-  hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-
-  io_context.run();
-}
-
-BOOST_AUTO_TEST_CASE(test_asio_waitable_callback,
-                     *boost::unit_test_framework::disabled()) {
-
-  winrt::com_ptr<IFabricQueryClient> client;
-
-  HRESULT hr =
-      ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
-
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-
-  auto f = [&]() -> net::awaitable<void> {
-    auto executor = co_await net::this_coro::executor;
-    HRESULT hr = S_OK;
-    // this is a obj holder
-    winrt::com_ptr<sf::IAwaitableCallback> callback =
-        winrt::make<sf::AsioAwaitableCallback>(executor);
-
-    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
-    FABRIC_NODE_QUERY_DESCRIPTION node = {};
-    hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
-
-    BOOST_REQUIRE_EQUAL(hr, S_OK);
-    co_await callback->await();
-
-    winrt::com_ptr<IFabricGetNodeListResult> result;
-    hr = client->EndGetNodeList(ctx.get(), result.put());
-
-    BOOST_REQUIRE_EQUAL(hr, S_OK);
-
-    const FABRIC_NODE_QUERY_RESULT_LIST *nodes = result->get_NodeList();
-    BOOST_CHECK_NE(nodes, nullptr);
-  };
-  net::io_context io_context;
-
-  net::co_spawn(io_context, f, net::detached);
-  net::co_spawn(io_context, f, net::detached);
-
-  io_context.run();
-}
-
-BOOST_AUTO_TEST_CASE(test_asio_waitable_fabric_client,
-                     *boost::unit_test_framework::disabled()) {
-  winrt::com_ptr<IFabricQueryClient> client;
-
-  HRESULT hr =
-      ::FabricCreateLocalClient(IID_IFabricQueryClient, (void **)client.put());
-
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-
-  // try use asio ptr
-  boost::system::error_code ec;
-  net::io_context io_context;
-
-  sf::AwaitableFabricQueryClient fc(client);
-
-  auto f = [&]() -> net::awaitable<void> {
-    FABRIC_NODE_QUERY_DESCRIPTION node = {};
-    winrt::com_ptr<IFabricGetNodeListResult> result;
-    HRESULT lhr = co_await fc.GetNodeListExample(&node, result.put());
-    BOOST_REQUIRE_EQUAL(lhr, S_OK);
-    BOOST_REQUIRE_NE(result->get_NodeList(), nullptr);
-  };
-
-  net::co_spawn(io_context, f, net::detached);
-
-  auto f2 = [&]() -> net::awaitable<void> {
-    HRESULT lhr = S_OK;
-    FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION query = {};
-    winrt::com_ptr<IFabricGetApplicationTypeListResult> result;
-    lhr = co_await fc.GetApplicationTypeList(&query, result.put());
-    BOOST_REQUIRE_EQUAL(lhr, S_OK);
-    BOOST_REQUIRE_NE(result->get_ApplicationTypeList(), nullptr);
-  };
-
-  net::co_spawn(io_context, f2, net::detached);
-
-  winrt::com_ptr<IFabricHealthClient> healthClient;
-
-  hr = ::FabricCreateLocalClient(IID_IFabricHealthClient,
-                                 (void **)healthClient.put());
-  BOOST_REQUIRE_EQUAL(hr, S_OK);
-
-  sf::AwaitableFabricHealthClient hc(healthClient);
-
-  auto fhealth = [&]() -> net::awaitable<void> {
-    HRESULT lhr = S_OK;
-    FABRIC_CLUSTER_HEALTH_POLICY query = {};
-    winrt::com_ptr<IFabricClusterHealthResult> result;
-    lhr = co_await hc.GetClusterHealth(&query, result.put());
-    BOOST_REQUIRE_EQUAL(lhr, S_OK);
-    BOOST_REQUIRE_NE(result->get_ClusterHealth(), nullptr);
-  };
-  net::co_spawn(io_context, fhealth, net::detached);
-
-  auto fhealth2 = [&]() -> net::awaitable<void> {
-    HRESULT lhr = S_OK;
-    std::wstring nodeName = L"_Node_0"; // This is the name in default cluster
-    FABRIC_CLUSTER_HEALTH_POLICY query = {};
-    {
-      winrt::com_ptr<IFabricNodeHealthResult> result;
-      lhr = co_await hc.GetNodeHealth(nodeName.c_str(), &query, result.put());
-      BOOST_REQUIRE_EQUAL(lhr, S_OK);
-      BOOST_REQUIRE_NE(result->get_NodeHealth(), nullptr);
-    }
-    // get a unknown node and check error
-    {
-      winrt::com_ptr<IFabricNodeHealthResult> result;
-      lhr = co_await hc.GetNodeHealth(L"BadNodeName", &query, result.put());
-      BOOST_CHECK_MESSAGE(lhr == FABRIC_E_HEALTH_ENTITY_NOT_FOUND,
-                          "not found: " + sf::get_fabric_error_str(lhr));
-      BOOST_REQUIRE_EQUAL(lhr, FABRIC_E_HEALTH_ENTITY_NOT_FOUND);
-      BOOST_REQUIRE_EQUAL(result.get(), nullptr);
-    }
-  };
-  net::co_spawn(io_context, fhealth2, net::detached);
-
-  io_context.run();
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+#include <latch>
 
 // Tests for reverse wrapper
 // impl is coro but the interface is fabric async.
@@ -191,7 +29,9 @@ BOOST_AUTO_TEST_SUITE_END()
 #include <winrt/base.h>
 
 #include <any>
-#include <latch>
+
+namespace sf = servicefabric;
+namespace net = boost::asio;
 
 class myctx : public winrt::implements<myctx, IFabricAsyncOperationContext> {
 public:
@@ -387,70 +227,229 @@ private:
   appInstanceImpl impl_;
 };
 
-BOOST_AUTO_TEST_SUITE(test_fabric_asio2)
+boost::ut::suite errors = [] {
+  using namespace boost::ut;
 
-BOOST_AUTO_TEST_CASE(test_asio_fabric_reverse) {
-  net::io_context ioc;
+  // disabled for requiring a running SF cluster
+  if (false) {
+    "asio_callback"_test = [] {
+      winrt::com_ptr<IFabricQueryClient> client;
 
-  winrt::com_ptr<IFabricStatelessServiceInstance> svc =
-      winrt::make<appInstance>(ioc);
+      HRESULT hr = ::FabricCreateLocalClient(IID_IFabricQueryClient,
+                                             (void **)client.put());
 
-  // ioc must run after the job is posted to it,
-  // otherwise ioc will see no jobs and finish run immediately.
-  std::latch lch(1);
+      expect(hr == S_OK >> fatal);
 
-  // use waitable ctx
-  auto f = [&]() {
-    // test coro backend api.
-    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+      // try use asio ptr
+      boost::system::error_code ec;
+      net::io_context io_context;
 
-    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+      auto lamda_callback = [client](IFabricAsyncOperationContext *ctx) {
+        winrt::com_ptr<IFabricGetNodeListResult> result;
+        HRESULT hr = client->EndGetNodeList(ctx, result.put());
 
-    HRESULT hr = svc->BeginOpen(nullptr, // partition
-                                callback.get(), ctx.put());
-    // job is pushed to ioc in svc
-    lch.count_down();
-    BOOST_REQUIRE_EQUAL(hr, S_OK);
-    callback->Wait();
-    winrt::com_ptr<IFabricStringResult> addr;
-    hr = svc->EndOpen(ctx.get(), addr.put());
-    BOOST_REQUIRE_EQUAL(hr, S_OK);
-    BOOST_REQUIRE(std::wstring(addr->get_String()) ==
-                  std::wstring(L"myaddress"));
+        expect(hr == S_OK >> fatal);
+
+        const FABRIC_NODE_QUERY_RESULT_LIST *nodes = result->get_NodeList();
+        expect(nodes != nullptr >> fatal);
+      };
+
+      winrt::com_ptr<IFabricAsyncOperationCallback> callback =
+          winrt::make<sf::AsioCallback>(lamda_callback,
+                                        io_context.get_executor());
+
+      winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+      FABRIC_NODE_QUERY_DESCRIPTION node = {};
+      hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
+      expect(hr == S_OK >> fatal);
+
+      io_context.run();
+    };
+
+    // disabled
+    "asio_waitable_callback"_test = [] {
+      winrt::com_ptr<IFabricQueryClient> client;
+
+      HRESULT hr = ::FabricCreateLocalClient(IID_IFabricQueryClient,
+                                             (void **)client.put());
+
+      expect(hr == S_OK >> fatal);
+
+      auto f = [&]() -> net::awaitable<void> {
+        auto executor = co_await net::this_coro::executor;
+        HRESULT hr = S_OK;
+        // this is a obj holder
+        winrt::com_ptr<sf::IAwaitableCallback> callback =
+            winrt::make<sf::AsioAwaitableCallback>(executor);
+
+        winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+        FABRIC_NODE_QUERY_DESCRIPTION node = {};
+        hr = client->BeginGetNodeList(&node, 1000, callback.get(), ctx.put());
+
+        expect(hr == S_OK >> fatal);
+        co_await callback->await();
+
+        winrt::com_ptr<IFabricGetNodeListResult> result;
+        hr = client->EndGetNodeList(ctx.get(), result.put());
+
+        expect(hr == S_OK >> fatal);
+
+        const FABRIC_NODE_QUERY_RESULT_LIST *nodes = result->get_NodeList();
+        expect(nodes != nullptr >> fatal);
+      };
+      net::io_context io_context;
+
+      net::co_spawn(io_context, f, net::detached);
+      net::co_spawn(io_context, f, net::detached);
+
+      io_context.run();
+    };
+
+    // disabled.
+    "asio_waitable_fabric_client"_test = [] {
+      winrt::com_ptr<IFabricQueryClient> client;
+
+      HRESULT hr = ::FabricCreateLocalClient(IID_IFabricQueryClient,
+                                             (void **)client.put());
+
+      expect(hr == S_OK);
+
+      // try use asio ptr
+      boost::system::error_code ec;
+      net::io_context io_context;
+
+      sf::AwaitableFabricQueryClient fc(client);
+
+      auto f = [&]() -> net::awaitable<void> {
+        FABRIC_NODE_QUERY_DESCRIPTION node = {};
+        winrt::com_ptr<IFabricGetNodeListResult> result;
+        HRESULT lhr = co_await fc.GetNodeListExample(&node, result.put());
+        expect(lhr == S_OK >> fatal);
+        expect(result->get_NodeList() != nullptr >> fatal);
+      };
+
+      net::co_spawn(io_context, f, net::detached);
+
+      auto f2 = [&]() -> net::awaitable<void> {
+        HRESULT lhr = S_OK;
+        FABRIC_APPLICATION_TYPE_QUERY_DESCRIPTION query = {};
+        winrt::com_ptr<IFabricGetApplicationTypeListResult> result;
+        lhr = co_await fc.GetApplicationTypeList(&query, result.put());
+        expect(lhr == S_OK >> fatal);
+        expect(result->get_ApplicationTypeList() != nullptr >> fatal);
+      };
+
+      net::co_spawn(io_context, f2, net::detached);
+
+      winrt::com_ptr<IFabricHealthClient> healthClient;
+
+      hr = ::FabricCreateLocalClient(IID_IFabricHealthClient,
+                                     (void **)healthClient.put());
+      expect(hr == S_OK >> fatal);
+
+      sf::AwaitableFabricHealthClient hc(healthClient);
+
+      auto fhealth = [&]() -> net::awaitable<void> {
+        HRESULT lhr = S_OK;
+        FABRIC_CLUSTER_HEALTH_POLICY query = {};
+        winrt::com_ptr<IFabricClusterHealthResult> result;
+        lhr = co_await hc.GetClusterHealth(&query, result.put());
+        expect(lhr == S_OK >> fatal);
+        expect(result->get_ClusterHealth() != nullptr >> fatal);
+      };
+      net::co_spawn(io_context, fhealth, net::detached);
+
+      auto fhealth2 = [&]() -> net::awaitable<void> {
+        HRESULT lhr = S_OK;
+        std::wstring nodeName =
+            L"_Node_0"; // This is the name in default cluster
+        FABRIC_CLUSTER_HEALTH_POLICY query = {};
+        {
+          winrt::com_ptr<IFabricNodeHealthResult> result;
+          lhr =
+              co_await hc.GetNodeHealth(nodeName.c_str(), &query, result.put());
+          expect(lhr == S_OK >> fatal);
+          expect(result->get_NodeHealth() != nullptr >> fatal);
+        }
+        // get a unknown node and check error
+        {
+          winrt::com_ptr<IFabricNodeHealthResult> result;
+          lhr = co_await hc.GetNodeHealth(L"BadNodeName", &query, result.put());
+          expect(lhr == FABRIC_E_HEALTH_ENTITY_NOT_FOUND)
+              << "not found: " + sf::get_fabric_error_str(lhr);
+          expect(lhr == FABRIC_E_HEALTH_ENTITY_NOT_FOUND >> fatal);
+          expect(result.get() == nullptr >> fatal);
+        }
+      };
+      net::co_spawn(io_context, fhealth2, net::detached);
+
+      io_context.run();
+    };
+  } // end if false
+  "asio_fabric_reverse"_test = [] {
+    net::io_context ioc;
+
+    winrt::com_ptr<IFabricStatelessServiceInstance> svc =
+        winrt::make<appInstance>(ioc);
+
+    // ioc must run after the job is posted to it,
+    // otherwise ioc will see no jobs and finish run immediately.
+    std::latch lch(1);
+
+    // use waitable ctx
+    auto f = [&]() {
+      // test coro backend api.
+      winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+          winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+
+      winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+
+      HRESULT hr = svc->BeginOpen(nullptr, // partition
+                                  callback.get(), ctx.put());
+      // job is pushed to ioc in svc
+      lch.count_down();
+      expect(hr == S_OK >> fatal);
+      callback->Wait();
+      winrt::com_ptr<IFabricStringResult> addr;
+      hr = svc->EndOpen(ctx.get(), addr.put());
+      expect(hr == S_OK >> fatal);
+      bool str_eq =
+          (std::wstring(addr->get_String()) == std::wstring(L"myaddress"));
+      expect(str_eq >> fatal);
+    };
+
+    std::latch lch2(1);
+    auto f2 = [&]() {
+      // test callback backend api
+      appInstance2 app2(ioc);
+      winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+          winrt::make<sf::FabricAsyncOperationWaitableCallback>();
+      winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+
+      HRESULT hr = app2.BeginProcessMessage("hello", callback.get(), ctx.put());
+      lch2.count_down();
+      expect(hr == S_OK >> fatal);
+      callback->Wait();
+      std::string reply;
+      hr = app2.EndProcessMessage(ctx.get(), &reply);
+      expect(hr == S_OK >> fatal);
+      expect(std::string("hellohello") == reply >> fatal);
+    };
+
+    // start the operation
+    std::jthread th(f);
+    std::jthread th2(f2);
+
+    std::jthread th_io([&]() {
+      lch.wait();
+      lch2.wait();
+      ioc.run();
+    });
+
+    th.join();
+    th2.join();
+    th_io.join();
   };
+};
 
-  std::latch lch2(1);
-  auto f2 = [&]() {
-    // test callback backend api
-    appInstance2 app2(ioc);
-    winrt::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        winrt::make<sf::FabricAsyncOperationWaitableCallback>();
-    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
-
-    HRESULT hr = app2.BeginProcessMessage("hello", callback.get(), ctx.put());
-    lch2.count_down();
-    BOOST_REQUIRE_EQUAL(hr, S_OK);
-    callback->Wait();
-    std::string reply;
-    hr = app2.EndProcessMessage(ctx.get(), &reply);
-    BOOST_REQUIRE_EQUAL(hr, S_OK);
-    BOOST_REQUIRE_EQUAL("hellohello", reply);
-  };
-
-  // start the operation
-  std::jthread th(f);
-  std::jthread th2(f2);
-
-  std::jthread th_io([&]() {
-    lch.wait();
-    lch2.wait();
-    ioc.run();
-  });
-
-  th.join();
-  th2.join();
-  th_io.join();
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+int main() {}

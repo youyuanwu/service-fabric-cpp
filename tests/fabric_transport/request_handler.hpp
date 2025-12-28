@@ -30,13 +30,17 @@ public:
 #ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug)
         << "request_handler::BeginProcessRequest id: " << clientId;
+#else
+    UNREFERENCED_PARAMETER(clientId);
 #endif
+#ifdef SF_DEBUG
     std::string body = sf::get_body(message);
     std::string headers = sf::get_header(message);
-#ifdef SF_DEBUG
     BOOST_LOG_TRIVIAL(debug)
         << "request_handler::BeginProcessRequest header: " << headers
         << " body: " << body;
+#else
+    UNREFERENCED_PARAMETER(message);
 #endif
 
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =

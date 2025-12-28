@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "boost/log/trivial.hpp"
 #include "fabricservicecommunication_.h"
 #include <winrt/base.h>
 
@@ -24,12 +25,15 @@ public:
       /* [retval][out] */ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
     UNREFERENCED_PARAMETER(clientId);
-    FABRIC_MESSAGE_BUFFER *body = message->Get_Body();
 #ifdef SF_DEBUG
+    FABRIC_MESSAGE_BUFFER *body = message->Get_Body();
     BOOST_LOG_TRIVIAL(debug)
         << "request_handler::BeginProcessRequest: body "
         << std::string(body->Buffer, body->Buffer + body->BufferSize);
+#else
+    UNREFERENCED_PARAMETER(message);
 #endif
+
     winrt::com_ptr<IFabricAsyncOperationContext> ctx =
         winrt::make<sf::async_context>(callback);
     *context = ctx.detach();

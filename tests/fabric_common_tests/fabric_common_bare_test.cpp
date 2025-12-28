@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE fabric_common_test
+#include <boost/ut.hpp>
 
 #include "AsyncOperation.h"
 #include "ComAsyncOperationContext.h"
@@ -6,7 +6,6 @@
 #include "ComProxyAsyncOperation.h"
 #include "CompletedAsyncOperation.h"
 #include "servicefabric/waitable_callback.hpp"
-#include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <winrt/base.h>
 
@@ -124,32 +123,34 @@ ErrorCode ComponentA::EndFooA(AsyncOperationSPtr const &fooAOperation) {
   return FooAAsyncOperation::End(fooAOperation);
 }
 
-BOOST_AUTO_TEST_SUITE(test_fabric_common_bare)
+boost::ut::suite errors = [] {
+  using namespace boost::ut;
 
-BOOST_AUTO_TEST_CASE(basic_test) {
-  auto componentA = std::make_shared<ComponentA>();
-  auto componentAPtr = componentA.get();
-  std::latch sync(1);
+  "basic"_test = [] {
+    auto componentA = std::make_shared<ComponentA>();
+    auto componentAPtr = componentA.get();
+    std::latch sync(1);
 
-  auto operation = componentA->BeginFooA(
-      [componentAPtr, &sync](AsyncOperationSPtr const &fooAOperation) {
-        GLogger->Write("BeginFooA callback");
-        if (!fooAOperation->CompletedSynchronously) {
-          GLogger->Write("BeginFooA callback async invoke");
-          ErrorCode errorCode = componentAPtr->EndFooA(fooAOperation);
-          BOOST_REQUIRE(errorCode.IsSuccess());
-          sync.count_down();
-        }
-      },
-      AsyncOperationRoot<bool>::Create(true)); // use a dummy root op
-  GLogger->Write("ComponentA op started");
-  if (operation->CompletedSynchronously) {
-    GLogger->Write("BeginFooA Completed same thread.");
-    ErrorCode errorCode = componentAPtr->EndFooA(operation);
-    BOOST_REQUIRE(errorCode.IsSuccess());
-    sync.count_down();
-  }
-  sync.wait();
+    auto operation = componentA->BeginFooA(
+        [componentAPtr, &sync](AsyncOperationSPtr const &fooAOperation) {
+          GLogger->Write("BeginFooA callback");
+          if (!fooAOperation->CompletedSynchronously) {
+            GLogger->Write("BeginFooA callback async invoke");
+            ErrorCode errorCode = componentAPtr->EndFooA(fooAOperation);
+            expect(errorCode.IsSuccess());
+            sync.count_down();
+          }
+        },
+        AsyncOperationRoot<bool>::Create(true)); // use a dummy root op
+    GLogger->Write("ComponentA op started");
+    if (operation->CompletedSynchronously) {
+      GLogger->Write("BeginFooA Completed same thread.");
+      ErrorCode errorCode = componentAPtr->EndFooA(operation);
+      expect(errorCode.IsSuccess());
+      sync.count_down();
+    }
+    sync.wait();
+  };
 };
 
-BOOST_AUTO_TEST_SUITE_END()
+int main() {}

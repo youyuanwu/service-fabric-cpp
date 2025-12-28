@@ -9,7 +9,6 @@ target_include_directories(${test_name}
 )
 
 target_link_libraries(${test_name} PRIVATE
-    PUBLIC Boost::unit_test_framework Boost::disable_autolinking
     fabric_error
     fabric_ext
     FabricClient

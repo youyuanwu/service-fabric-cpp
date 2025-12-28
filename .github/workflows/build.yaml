@@ -30,7 +30,7 @@ jobs:
       if: runner.os == 'Windows'
       uses: actions/cache@v4
       with:
-        path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+        path: build/vcpkg_installed
         key: ${{ runner.os }}-vcpkg-binary-cache-${{ hashFiles('vcpkg*.json') }}
         restore-keys: |
           ${{ runner.os }}-vcpkg-binary-cache-
