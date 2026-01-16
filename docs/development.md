@@ -22,3 +22,6 @@ Remove-ServiceFabricApplicationPackage -ApplicationPackagePathInImageStore MyApp
 
 
 ```
+
+# TODO:
+Migrate to modules after this vscode issue: https://github.com/microsoft/vscode-cpptools/issues/6302

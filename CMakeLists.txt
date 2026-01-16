@@ -40,15 +40,13 @@ add_compile_definitions(_WIN32_WINNT=0x0602)
 
 message(STATUS "fetching fabric_metadata")
 include(FetchContent)
-FetchContent_Declare(fabric_metadata
-    GIT_REPOSITORY https://github.com/youyuanwu/service-fabric-metadata-fork
-    GIT_TAG b5a1b4190cabe3b1bc94ab2b47abaef7121742c5 # special commit with fix.
+FetchContent_Populate(fabric_metadata
+    GIT_REPOSITORY https://github.com/Azure/service-fabric-metadata
+    GIT_TAG v0.0.3
+    GIT_SHALLOW TRUE
 )
-FetchContent_GetProperties(fabric_metadata)
-if(NOT fabric_metadata_POPULATED)
-    FetchContent_Populate(fabric_metadata)
-    add_subdirectory(${fabric_metadata_SOURCE_DIR} ${fabric_metadata_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+
+include(cmake/ConfigFabric.cmake)
 
 find_package(argparse CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)

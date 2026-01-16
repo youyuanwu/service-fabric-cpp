@@ -11,7 +11,11 @@ jobs:
         BUILD_TYPE: ["Debug", "Release"]
         os: [ windows-latest ]
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
+
+    # needed for midl.exe
+    - name: Setup MSVC shell
+      uses: ilammy/msvc-dev-cmd@v1
 
     - name: Show VC version
       run: |
